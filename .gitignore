@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# 缓存与日志
+.cache/
+*.log
+nohup.out
+
+# 数据集与模型权重 (体积大,不上传)
+datasets/
+checkpoints/
+*.pt
+*.pth
+*.safetensors
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+
+# Windows
+Thumbs.db
+Desktop.ini
