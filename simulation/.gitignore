@@ -1,0 +1,7 @@
+.venv/
+.uv-cache/
+__pycache__/
+*.pyc
+.tmp/
+# Contains the API key; share configs/deepseek.example.json instead.
+configs/deepseek.local.json

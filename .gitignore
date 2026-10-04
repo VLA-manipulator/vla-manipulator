@@ -12,15 +12,25 @@ env/
 
 # 缓存与日志
 .cache/
+.uv-cache/
+.tmp/
 *.log
 nohup.out
 
 # 数据集与模型权重 (体积大,不上传)
 datasets/
 checkpoints/
+openpi-data/
+huggingface/
+wandb/
 *.pt
 *.pth
 *.safetensors
+*.ckpt
+
+# Local credentials and robot calibration
+*.local.json
+*calibration.local*.json
 
 # IDE / 编辑器
 .vscode/

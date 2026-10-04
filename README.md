@@ -1,55 +1,92 @@
-# LIBERO SmolVLA Probe
+# VLA Manipulator
 
-在 [LIBERO](https://libero-project.github.io/) 基准环境中运行微调后的 [SmolVLA](https://huggingface.co/lerobot/smolvla) 视觉-语言-动作 (VLA) 模型的探针脚本。
+SO101 机械臂的仿真数据采集、OpenPI π0.5 微调和评估工程。
 
-通过 [LeRobot](https://github.com/huggingface/lerobot) 加载 `lerobot/smolvla_libero` 预训练权重，在 LIBERO 仿真环境中执行一个开环控制循环，输出预测的动作块 (action chunk)。
+当前已完成：
 
-## 文件说明
+- MuJoCo SO101 桌面环境；
+- 全局相机和腕部相机观测；
+- 随机物体布局与随机机械臂初始姿态；
+- IK 专家抓取策略；
+- 20 Hz 同步示范采集；
+- 不依赖 LeRobot 的 staging 数据格式。
 
-| 文件 | 作用 |
-|---|---|
-| `libero_smolvla_probe.py` | 主程序:加载模型 → 创建 LIBERO 环境 → 循环预测并执行动作 |
-| `run_libero_smolvla_gui.ps1` | WSL 启动器:通过 WSLg 打开 MuJoCo 可视化窗口并运行主程序 |
+## 仓库结构
 
-## 环境要求
-
-- Python 3.10+ (开发环境为 3.12)
-- `lerobot` 源码 (来自 `huggingface/lerobot`)
-- `libero` 包及其仿真依赖 (mujoco, robosuite 等)
-- PyTorch + CUDA
-- GUI 模式需要 WSLg (Windows 11 自带)
-
-## 运行方式
-
-### 无界面 (headless)
-
-```bash
-python libero_smolvla_probe.py --model-id lerobot/smolvla_libero --steps 5
+```text
+vla-manipulator/
+├── simulation/                 # 独立的 MuJoCo/采集 Python 项目
+│   ├── mj_env/                 # 环境、专家策略和数据记录器
+│   ├── so101/                  # 运动学、MJCF/URDF 和网格资源
+│   ├── pyproject.toml
+│   └── uv.lock
+├── openpi_ext/                 # SO101→LeRobot、OpenPI policy/config（逐步补齐）
+├── scripts/                    # 服务器训练和评估入口（逐步补齐）
+├── libero_smolvla_probe.py     # 早期 LIBERO/SmolVLA 探索实验
+└── run_libero_smolvla_gui.ps1
 ```
 
-### 带 MuJoCo 可视化窗口
+仿真和 OpenPI 使用两个独立虚拟环境。原因是仿真固定
+`gymnasium==1.3.0`，而 OpenPI 固定的 LeRobot 版本使用
+`gymnasium==0.29.1`。缓存、模型权重和数据目录可以共享，
+但不能共享同一个 `.venv`。
 
-```bash
-python libero_smolvla_probe.py --gui --steps 5
-```
-
-### 通过 WSL PowerShell 启动器
+## 本地仿真环境
 
 ```powershell
-# 在 Windows 上直接运行
-.\run_libero_smolvla_gui.ps1
+cd simulation
+uv sync
+uv run python -m mj_env.scripts.scripted_pick --object cube_red --episodes 5
 ```
 
-## 主要参数
+采集五条 staging 轨迹：
 
-| 参数 | 默认值 | 说明 |
-|---|---|---|
-| `--model-id` | `lerobot/smolvla_libero` | HuggingFace 上的模型 ID |
-| `--steps` | `5` | VLA 动作块数量 |
-| `--num-steps` | `5` | 模型内部推理步数 |
-| `--gui` | 关 | 打开 MuJoCo 可视化窗口 |
+```powershell
+uv run python -m mj_env.scripts.collect_demonstrations `
+  --object cube_red `
+  --episodes 5 `
+  --seed 0 `
+  --root .tmp/staging/cube_red_smoke_5 `
+  --headless
+```
 
-## 说明
+每帧保存两个 `224×224 RGB` 视角、六维状态、六维动作、任务文本和
+严格的 20 Hz 时间戳。只有成功 episode 会被保存。`.tmp/`、正式数据集、
+模型权重和 checkpoint 均不提交到 Git。
 
-- 模型权重首次运行时会从 HuggingFace 下载。国内网络可通过 `HF_ENDPOINT=https://hf-mirror.com` 镜像加速。
-- 当前探针使用 LIBERO Spatial 任务的第 0 个任务 (task_id=0)，128×128 像素观测。
+## 服务器规划
+
+```text
+/root/autodl-tmp/
+├── workspace/vla-manipulator/     # 本仓库
+├── workspace/openpi/              # 官方 OpenPI 仓库及独立 .venv
+├── datasets/so101_staging/        # 上传的临时轨迹
+├── datasets/so101_lerobot/        # 转换后的正式数据
+├── huggingface/                   # Hugging Face 共享缓存
+├── openpi-data/                   # OpenPI 权重缓存
+├── uv-cache/                      # uv 共享下载缓存
+└── checkpoints/                   # 训练结果
+```
+
+五条数据只用于验证“采集→转换→归一化→训练→推理”链路，不足以训练出
+可靠策略。流程跑通后再采集每个任务至少 100～200 条具有不同布局的成功轨迹。
+
+## 当前下一步
+
+1. 在 `openpi_ext/` 添加 staging→LeRobot 转换器；
+2. 添加 SO101 的 OpenPI 输入/输出映射；
+3. 基于 `pi05_base` 定义 LoRA 训练配置；
+4. 转换五条 smoke 数据并计算 normalization statistics；
+5. 启动短训练，验证 checkpoint 和闭环推理链路。
+
+## 测试
+
+```powershell
+cd simulation
+uv run python -m unittest \
+  mj_env.test_demonstrations \
+  mj_env.test_closed_loop \
+  mj_env.test_task_runtime
+```
+
+更详细的仿真说明见 [`simulation/README.md`](simulation/README.md)。

@@ -1,0 +1,161 @@
+<mujoco model="so101_tabletop">
+  <!-- The robot XML owns the calibrated joints, meshes and six actuators.
+       It is a pure hardware description: the wrist camera this environment
+       needs is injected at load time by mj_env/scene.py, not written here. -->
+  <include file="../../so101/assets/so101_new_calib.xml"/>
+
+  <!-- Paths are relative to this scene; the included calibrated robot uses
+       meshes from the local SO101 asset bundle. -->
+  <compiler angle="radian" meshdir="../../so101/assets/assets" autolimits="true"/>
+
+  <!-- The elliptic cone plus a high impedance ratio is the standard MuJoCo
+       recipe for grasps that do not slip out of a friction-driven gripper. -->
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"
+          cone="elliptic" impratio="10"/>
+
+  <visual>
+    <headlight diffuse="0.35 0.35 0.35" ambient="0.25 0.25 0.25" specular="0.1 0.1 0.1"/>
+    <global azimuth="150" elevation="-25" offwidth="1280" offheight="960"/>
+    <map znear="0.01" zfar="10"/>
+    <quality shadowsize="4096"/>
+  </visual>
+
+  <asset>
+    <texture name="skybox" type="skybox" builtin="gradient"
+             rgb1="0.55 0.62 0.72" rgb2="0.10 0.12 0.16" width="512" height="1024"/>
+    <texture name="floor_texture" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.16 0.17 0.19" rgb2="0.22 0.23 0.26"/>
+    <material name="floor_material" texture="floor_texture" texrepeat="6 6" texuniform="true"/>
+    <texture name="table_texture" type="2d" builtin="flat" width="256" height="256"
+             rgb1="0.78 0.70 0.58" rgb2="0.78 0.70 0.58"/>
+    <material name="table_material" texture="table_texture" specular="0.15" shininess="0.2"/>
+    <material name="frame_material" rgba="0.30 0.32 0.35 1"/>
+    <material name="backdrop_material" rgba="0.86 0.87 0.89 1"/>
+
+    <material name="object_red" rgba="0.85 0.09 0.07 1"/>
+    <material name="object_blue" rgba="0.08 0.28 0.85 1"/>
+    <material name="object_green" rgba="0.09 0.62 0.22 1"/>
+    <material name="object_yellow" rgba="0.95 0.72 0.05 1"/>
+    <material name="object_purple" rgba="0.52 0.14 0.76 1"/>
+    <material name="object_orange" rgba="0.95 0.36 0.05 1"/>
+    <material name="metal" rgba="0.62 0.65 0.70 1" specular="0.9" shininess="0.6"/>
+  </asset>
+
+  <default>
+    <!-- Objects are light (roughly 15-30 g) and high-friction so the SO101's
+         small jaw torque is enough to hold them.  condim=6 buys the last two
+         friction terms: torsional, which stops a grasped object spinning
+         between the pads, and rolling, without which a ball or a dumbbell
+         resting on its disc rims creeps across the table at a centimetre a
+         second on solver drift alone.  Grasp contacts are unaffected: the
+         finger pads carry priority=1 and impose their own condim=4. -->
+    <default class="table_object">
+      <geom density="500" friction="1.5 0.05 0.0015" condim="6"
+            solref="0.008 1" solimp="0.95 0.99 0.001"/>
+    </default>
+    <default class="furniture">
+      <geom condim="3" friction="1.0 0.02 0.002"/>
+    </default>
+    <default class="decor">
+      <!-- Visual-only: no collisions, so table legs cannot trap an object. -->
+      <geom contype="0" conaffinity="0" group="2"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="key" pos="0.55 -0.45 1.30" dir="-0.35 0.30 -1" directional="true"
+           diffuse="0.50 0.50 0.50" specular="0.15 0.15 0.15" castshadow="true"/>
+    <light name="fill" pos="0.10 0.60 1.00" dir="0.20 -0.45 -1" directional="true"
+           diffuse="0.22 0.22 0.22" castshadow="false"/>
+
+    <!-- Frame convention: the robot base is at the origin with +x pointing
+         forward across the table and +z up.  The tabletop surface is z = 0,
+         flush with the base, and the arm stands at the rear edge. -->
+    <geom name="tabletop" class="furniture" type="box" pos="0.40 0 -0.02"
+          size="0.45 0.42 0.02" material="table_material"/>
+    <geom name="floor" class="furniture" type="plane" pos="0.40 0 -0.72"
+          size="3 3 0.1" material="floor_material"/>
+
+    <body name="table_frame" pos="0.40 0 0" childclass="decor">
+      <geom type="box" pos="-0.42 -0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+      <geom type="box" pos="-0.42 0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+      <geom type="box" pos="0.42 -0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+      <geom type="box" pos="0.42 0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+    </body>
+
+    <!-- Plain backdrop behind the arm so the observation cameras see objects
+         against a uniform background instead of the skybox gradient. -->
+    <geom name="backdrop" class="decor" type="box" pos="-0.08 0 0.09"
+          size="0.012 0.50 0.32" material="backdrop_material"/>
+
+    <!-- Policy global camera: a true top-down view.  Camera +Y (image up) is
+         aligned with world +X, so the arm base at x=0 is centred near the
+         bottom of the image and the forward work area fills the space above
+         it.  The wrist camera is attached dynamically in mj_env/scene.py. -->
+    <camera name="global_camera" pos="0.17 0 0.66"
+            xyaxes="0 -1 0 1 0 0" fovy="46"/>
+    <!-- Legacy alias; mj_env exposes this view as global_camera. -->
+    <camera name="overhead_camera" pos="0.17 0 0.66" xyaxes="0 -1 0 1 0 0" fovy="46"/>
+
+    <!-- Free objects.  The XML poses below are only a sensible default layout;
+         mj_env/env.py re-samples position and yaw at every reset.  Sizes are
+         chosen against the jaw opening mj_env/gripper.py measures off the
+         finger meshes -- 2 mm at the closed limit, 94 mm at the open one --
+         so every object sits comfortably inside the jaw's usable range. -->
+
+    <!-- Long rods: graspable anywhere along the shaft, but the jaw has to be
+         aligned across the shaft rather than along it. -->
+    <body name="rod_red" pos="0.2145 -0.180 0.009" childclass="table_object">
+      <freejoint name="rod_red_free"/>
+      <geom name="rod_red_shaft" type="capsule" fromto="-0.075 0 0 0.075 0 0"
+            size="0.009" material="object_red"/>
+    </body>
+    <body name="rod_yellow" pos="0.2145 0.180 0.009" childclass="table_object">
+      <freejoint name="rod_yellow_free"/>
+      <geom name="rod_yellow_shaft" type="capsule" fromto="-0.075 0 0 0.075 0 0"
+            size="0.009" material="object_yellow"/>
+    </body>
+
+    <!-- Balls: no flat faces, so the jaw must open wide and close firmly. -->
+    <body name="sphere_blue" pos="0.1414 -0.1414 0.020" childclass="table_object">
+      <freejoint name="sphere_blue_free"/>
+      <geom name="sphere_blue_ball" type="sphere" size="0.020" material="object_blue"/>
+    </body>
+    <body name="sphere_green" pos="0.1414 0.1414 0.020" childclass="table_object">
+      <freejoint name="sphere_green_free"/>
+      <geom name="sphere_green_ball" type="sphere" size="0.020" material="object_green"/>
+    </body>
+
+    <!-- Cubes: 35 mm, the easy parallel-face baseline. -->
+    <body name="cube_red" pos="0.1932 -0.0518 0.0175" childclass="table_object">
+      <freejoint name="cube_red_free"/>
+      <geom name="cube_red_body" type="box" size="0.0175 0.0175 0.0175" material="object_red"/>
+    </body>
+    <body name="cube_blue" pos="0.1932 0.0518 0.0175" childclass="table_object">
+      <freejoint name="cube_blue_free"/>
+      <geom name="cube_blue_body" type="box" size="0.0175 0.0175 0.0175" material="object_blue"/>
+    </body>
+
+    <!-- Dumbbells: the 44 mm end discs are too wide for the jaw, so the only
+         viable grasp is the 16 mm handle between them.  This is the object
+         that punishes a policy for aiming at the centroid without looking. -->
+    <body name="dumbbell_purple" pos="0.2826 -0.0652 0.022" childclass="table_object">
+      <freejoint name="dumbbell_purple_free"/>
+      <geom name="dumbbell_purple_handle" type="cylinder" fromto="-0.026 0 0 0.026 0 0"
+            size="0.008" material="metal"/>
+      <geom name="dumbbell_purple_disc_a" type="cylinder" fromto="-0.046 0 0 -0.026 0 0"
+            size="0.022" material="object_purple"/>
+      <geom name="dumbbell_purple_disc_b" type="cylinder" fromto="0.026 0 0 0.046 0 0"
+            size="0.022" material="object_purple"/>
+    </body>
+    <body name="dumbbell_orange" pos="0.2826 0.0652 0.022" childclass="table_object">
+      <freejoint name="dumbbell_orange_free"/>
+      <geom name="dumbbell_orange_handle" type="cylinder" fromto="-0.026 0 0 0.026 0 0"
+            size="0.008" material="metal"/>
+      <geom name="dumbbell_orange_disc_a" type="cylinder" fromto="-0.046 0 0 -0.026 0 0"
+            size="0.022" material="object_orange"/>
+      <geom name="dumbbell_orange_disc_b" type="cylinder" fromto="0.026 0 0 0.046 0 0"
+            size="0.022" material="object_orange"/>
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,17 @@
+{
+  "api_key": "",
+  "base_url": "https://api.deepseek.com",
+  "model": "deepseek-flash",
+  "max_tokens": 2048,
+  "temperature": null,
+  "reasoning_effort": null,
+  "extra_body": {
+    "thinking": {
+      "type": "disabled"
+    }
+  },
+  "timeout_s": 120,
+  "max_rounds": 40,
+  "max_total_tokens": 100000,
+  "max_images_per_round": 32
+}

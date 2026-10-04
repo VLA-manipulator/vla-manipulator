@@ -1,0 +1,31 @@
+[project]
+name = "llm-plan"
+version = "0.1.0"
+description = "DeepSeek (deepseek-flash) tool-calling agent controlling a simulated SO101 arm in MuJoCo"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+# Versions are pinned to the environment this example was validated in;
+# newer releases break APIs (e.g. roboticstoolbox 1.4 removed robot.ET).
+dependencies = [
+    # LLM client
+    "httpx==0.28.1",
+    # MuJoCo simulation + SO101 kinematics
+    "mujoco==3.11.0",
+    "gymnasium==1.3.0",
+    "glfw==2.10.2",
+    "numpy==2.2.6",
+    "scipy==1.18.0",
+    "roboticstoolbox-python==1.3.1",
+    "spatialmath-python==1.1.16",
+    # Image processing (regions, optical flow, bundles)
+    "opencv-python==4.13.0.92",
+    "pillow==12.3.0",
+]
+
+[tool.uv]
+# Run as a source tree from the project root (python -m mj_env.xxx / example/xxx.py);
+# no wheel is built.
+package = false
+# Supported platforms: Windows and Linux only.
+environments = ["sys_platform == 'win32'", "sys_platform == 'linux'"]
+
