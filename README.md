@@ -21,9 +21,7 @@ vla-manipulator/
 │   ├── pyproject.toml
 │   └── uv.lock
 ├── openpi_ext/                 # SO101→LeRobot、OpenPI policy/config（逐步补齐）
-├── scripts/                    # 服务器训练和评估入口（逐步补齐）
-├── libero_smolvla_probe.py     # 早期 LIBERO/SmolVLA 探索实验
-└── run_libero_smolvla_gui.ps1
+└── scripts/                    # 服务器训练和评估入口（逐步补齐）
 ```
 
 仿真和 OpenPI 使用两个独立虚拟环境。原因是仿真固定
@@ -73,20 +71,17 @@ uv run python -m mj_env.scripts.collect_demonstrations `
 
 ## 当前下一步
 
-1. 在 `openpi_ext/` 添加 staging→LeRobot 转换器；
-2. 添加 SO101 的 OpenPI 输入/输出映射；
-3. 基于 `pi05_base` 定义 LoRA 训练配置；
-4. 转换五条 smoke 数据并计算 normalization statistics；
-5. 启动短训练，验证 checkpoint 和闭环推理链路。
+1. 添加 SO101 的 OpenPI 输入/输出映射；
+2. 基于 `pi05_base` 定义 LoRA 训练配置；
+3. 转换五条 smoke 数据并计算 normalization statistics；
+4. 启动短训练，验证 checkpoint 和闭环推理链路。
 
 ## 测试
 
 ```powershell
 cd simulation
 uv run python -m unittest \
-  mj_env.test_demonstrations \
-  mj_env.test_closed_loop \
-  mj_env.test_task_runtime
+  mj_env.test_demonstrations
 ```
 
 更详细的仿真说明见 [`simulation/README.md`](simulation/README.md)。

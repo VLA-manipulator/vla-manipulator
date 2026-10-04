@@ -1,93 +1,83 @@
-# llm-plan：用 DeepSeek (deepseek-flash) 控制 SO101 机械臂（MuJoCo 仿真）
+# SO101 MuJoCo simulation
 
-大模型通过 OpenAI 兼容的 Chat Completions + function calling 接口，看双相机图像（全局 + 腕部），
-逐段调用受限的机器人工具，控制 MuJoCo 中的 SO101 机械臂完成抓取任务。
-不依赖任何 agent 框架；模型没有 shell、任意文件或任意 HTTP 访问能力。
+用于 OpenPI π0.5 数据采集和闭环评估的 SO101 桌面抓取仿真。
 
-> 现状：交互链路（看图、调用工具、执行、记录）已跑通，**自主抓取尚未通过验收**。
-> 详见 [docs/deepseek_runner.md](docs/deepseek_runner.md)。
+该子项目只包含仿真、专家策略、示范采集和坐标适配，不调用任何在线语言模型。
 
-## 架构
-
-```text
-example/deepseek_robot.py  ──HTTPS──▶  DeepSeek API (deepseek-flash)
-        │  tool calls
-        ▼
-mj_env/task_journal.py (任务日志 / 安全校验 / 观测包)
-        │  HTTP 127.0.0.1:8765
-        ▼
-mj_env/agent_server.py (MuJoCo 仿真)
-```
-
-| 目录 | 内容 |
-| --- | --- |
-| `example/` | DeepSeek 机器人运行器、纯文本/图像客户端 |
-| `mj_env/` | SO101 桌面仿真、仿真 HTTP 服务、任务日志与运行时、色块与光流视觉工具 |
-| `so101/` | SO101 运动学与 MJCF/URDF/网格模型 |
-| `docs/` | 运行说明、仿真接口说明、模型运行时系统提示词 `robot_runtime_prompt.md` |
-| `configs/` | DeepSeek 配置模板 |
-
-## 环境
-
-- Python 3.12，[uv](https://docs.astral.sh/uv/)
-- 不需要 GPU。
-- 支持平台：Windows、Linux（x86_64 / aarch64）。实际运行验证过 Windows 11；Linux 依赖均有预编译 wheel，尚未实际运行验证。
-- 没有显示器的 Linux 服务器上，仿真服务需加 `--headless`，并设置 `MUJOCO_GL=egl`（有 GPU）或 `MUJOCO_GL=osmesa`（纯 CPU，需安装 OSMesa）用于相机离屏渲染：
-
-  ```bash
-  MUJOCO_GL=egl uv run python -u -m mj_env.agent_server --headless --seed 3 --target cube_red
-  ```
+## 安装
 
 ```powershell
 uv sync
 ```
 
-依赖版本已固定为验证过的版本（见 `pyproject.toml` / `uv.lock`）。
+需要 Python 3.12。仿真固定使用 `gymnasium==1.3.0`，因此与 OpenPI 的
+LeRobot 环境分开安装。
 
-## 配置 API Key
-
-```powershell
-copy configs\deepseek.example.json configs\deepseek.local.json
-```
-
-Linux：`cp configs/deepseek.example.json configs/deepseek.local.json`
-
-在 `configs/deepseek.local.json` 中填写 `api_key`，或设置环境变量 `DEEPSEEK_API_KEY`。
-该文件已被 `.gitignore` 忽略，不要把密钥写进模板。
-
-## 运行
-
-以下命令均在项目根目录运行，每个服务各开一个终端。
-
-1. 启动仿真服务（保持运行）：
-
-   ```powershell
-   uv run python -u -m mj_env.agent_server --seed 3 --target cube_red
-   ```
-
-2. 运行 DeepSeek 控制器：
-
-   ```powershell
-   uv run python example/deepseek_robot.py --task-id task_red_001 --instruction "抓起红色方块"
-   ```
-
-   不带参数启动时可以在命令行交互输入任务；运行期间输入新的一行即可修订任务，`/quit` 退出。
-   任务日志写入 `.tmp/tasks/<task-id>.jsonl`，用同一 ID 再次启动会续跑。
-
-仅测试 API 连通性和图像输入（不控制机械臂）：
+## 查看环境
 
 ```powershell
-uv run python example/deepseek_client.py --prompt "用一句话回答：你能接收图片吗？"
+uv run python -m mj_env.scripts.view_scene --seed 3 --target cube_red
 ```
 
-## 离线测试
+窗口中的自由视角只用于人工检查；策略输入是全局相机和腕部相机两路图像。
+
+## 专家策略
 
 ```powershell
-uv run python -m unittest example.test_deepseek_robot mj_env.test_task_runtime mj_env.test_task_journal mj_env.test_observation_bundle mj_env.test_closed_loop mj_env.test_visual_servo mj_env.test_image_regions mj_env.test_gripper_identification mj_env.test_agent_tools
+uv run python -m mj_env.scripts.scripted_pick --object cube_red --episodes 5
 ```
 
-## 更多文档
+每次 reset 会依据 seed 随机采样物体 XY 位置和绕 Z 轴朝向。专家策略默认还会
+轻微随机化机械臂初始关节姿态，并根据新物体位置重新求解 IK。
 
-- [docs/deepseek_runner.md](docs/deepseek_runner.md)：运行器参数、token 预算、工具说明与已知限制
-- [docs/agent_simulation.md](docs/agent_simulation.md)：仿真 HTTP 接口
-- [docs/robot_runtime_prompt.md](docs/robot_runtime_prompt.md)：发送给模型的系统提示词
+## 采集 staging 数据
+
+```powershell
+uv run python -m mj_env.scripts.collect_demonstrations `
+  --object cube_red `
+  --episodes 5 `
+  --seed 0 `
+  --root .tmp/staging/cube_red_smoke_5 `
+  --headless
+```
+
+每帧包含：
+
+- `image`：全局 RGB 图像；
+- `wrist_image`：腕部 RGB 图像；
+- `state`：六维 SO101 归一化电机坐标；
+- `actions`：六维 SO101 归一化电机坐标；
+- `timestamp`：基于 MuJoCo 仿真时间的 20 Hz 时间戳；
+- `task`：自然语言任务。
+
+只有成功 episode 会保存。输出目录被 `.gitignore` 忽略，使用仓库根目录
+`openpi_ext/convert_so101_staging_to_lerobot.py` 在服务器 OpenPI 环境中转换。
+
+## 坐标与控制
+
+环境原生状态和动作均为六个关节的绝对位置目标：五个机械臂关节加夹爪，
+单位为 MuJoCo 弧度，控制频率为 20 Hz。`LeRobotSO101Adapter` 将它们映射为
+五关节 `[-100, 100]`、夹爪 `[0, 100]` 的统一电机坐标。
+
+真机部署前必须使用真实 SO101 校准文件核对关节顺序、方向、零点和范围。
+
+## 主要文件
+
+| 路径 | 作用 |
+| --- | --- |
+| `mj_env/env.py` | Gymnasium/MuJoCo 环境与双相机观测 |
+| `mj_env/layout.py` | 随机物体布局 |
+| `mj_env/adapters.py` | MuJoCo 弧度与 SO101 电机坐标转换 |
+| `mj_env/demonstrations.py` | 同步帧记录和 staging 存储 |
+| `mj_env/scripts/scripted_pick.py` | IK 专家策略 |
+| `mj_env/scripts/collect_demonstrations.py` | 示范采集入口 |
+| `mj_env/scripts/view_scene.py` | 本地可视化入口 |
+| `so101/` | 运动学、MJCF/URDF 和网格资源 |
+
+## 测试
+
+```powershell
+uv run python -m unittest mj_env.test_demonstrations
+```
+
+无显示器的 Linux 服务器如需离屏渲染，可设置 `MUJOCO_GL=egl`。

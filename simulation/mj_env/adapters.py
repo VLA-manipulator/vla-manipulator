@@ -63,50 +63,6 @@ class LeRobotSO101Adapter:
         radians = self._radian_low + fraction * self._radian_span
         return np.clip(radians, self._radian_low, self._radian_high).astype(np.float32)
 
-    def to_so100_degrees(self, radians: np.ndarray) -> np.ndarray:
-        """Current SO101 MuJoCo radians -> legacy SO100 policy coordinates.
-
-        The official ``lerobot/smolvla_base`` checkpoint was pretrained with
-        ``so100_follower`` using ``use_degrees=True``.  The old SO100 and new
-        SO101 calibration frames differ by 90 degrees at shoulder lift and
-        elbow flex.  The gripper remains LeRobot's 0..100 coordinate.
-        """
-        values = self._coerce(radians, "radians")
-        degrees = np.rad2deg(values[:5])
-        gripper = self.to_lerobot(values)[5]
-        return np.asarray(
-            (
-                degrees[0],
-                90.0 - degrees[1],
-                degrees[2] + 90.0,
-                degrees[3],
-                degrees[4],
-                gripper,
-            ),
-            dtype=np.float32,
-        )
-
-    def from_so100_degrees(self, action: np.ndarray) -> np.ndarray:
-        """Legacy SO100 degree/gripper action -> current MuJoCo radians."""
-        values = np.asarray(action, dtype=np.float64).reshape(-1)
-        if values.shape != self._radian_low.shape or not np.all(np.isfinite(values)):
-            raise ValueError("expected six finite SO100 action values")
-        radians = np.asarray(
-            (
-                np.deg2rad(values[0]),
-                np.deg2rad(90.0 - values[1]),
-                np.deg2rad(values[2] - 90.0),
-                np.deg2rad(values[3]),
-                np.deg2rad(values[4]),
-                0.0,
-            ),
-            dtype=np.float64,
-        )
-        gripper_normalized = np.clip(values[5], self._norm_low[5], self._norm_high[5])
-        gripper_fraction = (gripper_normalized - self._norm_low[5]) / self._norm_span[5]
-        radians[5] = self._radian_low[5] + gripper_fraction * self._radian_span[5]
-        return np.clip(radians, self._radian_low, self._radian_high).astype(np.float32)
-
     def observation_to_lerobot(self, observation: dict) -> dict:
         """Copy an observation with ``observation.state`` in normalized units."""
         converted = dict(observation)

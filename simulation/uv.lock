@@ -24,33 +24,11 @@ name = "ansitable"
 version = "1.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colored", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "colored" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8d/4e/a6eec8f6f60cb65b365b5941c2c4a19f32f76e21e352cbda8218399752dc/ansitable-1.0.1.tar.gz", hash = "sha256:b6cd0e2ccba1c6402466d9e6a55fb939fec15239803b627c8ab54cf2edb70cc9", size = 86890, upload-time = "2026-07-27T22:46:49.157Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5a/7b/a6179cfc4a8e09afa15124e7831463c28a7b0d370e014d89f7727d912b8c/ansitable-1.0.1-py3-none-any.whl", hash = "sha256:fad3a4964c2382e65288b2e0dd891ade71eb0a64eacf80a97447cae0a21de1de", size = 15229, upload-time = "2026-07-27T22:46:47.845Z" },
-]
-
-[[package]]
-name = "anyio"
-version = "4.15.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "idna", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/a9/d2/f4d173e22df740bc37b1db102b386ba719b66e95b0f0d751f556b387e6d2/anyio-4.15.1.tar.gz", hash = "sha256:9f28306018cbd6d329e64a36d58256edff76dd996fe423bc957326e578b82a94", size = 276966, upload-time = "2026-09-05T10:42:39.44Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/12/b8/4bd346e22b28902df4d651910f5242c28d84e4a5c2435ca5c3f797ed7e2e/anyio-4.15.1-py3-none-any.whl", hash = "sha256:6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101", size = 132079, upload-time = "2026-09-05T10:42:37.923Z" },
-]
-
-[[package]]
-name = "certifi"
-version = "2026.7.22"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz", hash = "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55", size = 138112, upload-time = "2026-07-22T03:35:12.644Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl", hash = "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775", size = 136983, upload-time = "2026-07-22T03:35:11.276Z" },
 ]
 
 [[package]]
@@ -85,7 +63,7 @@ name = "contourpy"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "numpy" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/83/5a/a55177dd22553a277388e8a1b3220e92de91bacb28356cdc73caa240121d/contourpy-1.4.0.tar.gz", hash = "sha256:20156f5a1ac4f8ce02656e39a61e82164a3d359796dc8026f75b062783d500e1", size = 13323726, upload-time = "2026-09-11T19:05:05.808Z" }
 wheels = [
@@ -129,9 +107,9 @@ wheels = [
 
 [package.optional-dependencies]
 epath = [
-    { name = "fsspec", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "zipp", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "fsspec" },
+    { name = "typing-extensions" },
+    { name = "zipp" },
 ]
 
 [[package]]
@@ -195,51 +173,14 @@ name = "gymnasium"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cloudpickle", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "farama-notifications", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "cloudpickle" },
+    { name = "farama-notifications" },
+    { name = "numpy" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4d/ff/14b6880d703dfaca204490979d3254ccd280c99550798993319902873658/gymnasium-1.3.0.tar.gz", hash = "sha256:6939e86e835d6b71b6ba6bfd360487420876deafc79bfb7bacba83a7c446bcf3", size = 830646, upload-time = "2026-04-22T13:47:14.155Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e9/73/fda6a25f3beeb5e49d74330b44092b9e5a547395ccd478d1103ddcbff1fc/gymnasium-1.3.0-py3-none-any.whl", hash = "sha256:6b8c159a8540dcbcb221722d7efda24d78ebbcbc3bd2ea1c2611aa2a34471fc2", size = 953904, upload-time = "2026-04-22T13:47:12.13Z" },
-]
-
-[[package]]
-name = "h11"
-version = "0.16.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/01/ee/02a2c011bdab74c6fb3c75474d40b3052059d95df7e73351460c8588d963/h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1", size = 101250, upload-time = "2025-04-24T03:35:25.427Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86", size = 37515, upload-time = "2025-04-24T03:35:24.344Z" },
-]
-
-[[package]]
-name = "httpcore"
-version = "1.0.9"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "certifi", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "h11", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/06/94/82699a10bca87a5556c9c59b5963f2d039dbd239f25bc2a63907a05a14cb/httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8", size = 85484, upload-time = "2025-04-24T22:06:22.219Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55", size = 78784, upload-time = "2025-04-24T22:06:20.566Z" },
-]
-
-[[package]]
-name = "httpx"
-version = "0.28.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "anyio", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "certifi", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "httpcore", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "idna", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b1/df/48c586a5fe32a0f01324ee087459e112ebb7224f646c0b5023f5e79e9956/httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc", size = 141406, upload-time = "2024-12-06T15:37:23.222Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad", size = 73517, upload-time = "2024-12-06T15:37:21.509Z" },
 ]
 
 [[package]]
@@ -249,15 +190,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/52/63/51723b5f116cc04b061cb6f5a561790abf249d25931d515cd375e063e0f4/identify-2.6.19.tar.gz", hash = "sha256:6be5020c38fcb07da56c53733538a3081ea5aa70d36a156f83044bfbf9173842", size = 99567, upload-time = "2026-04-17T18:39:50.265Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/94/84/d9273cd09688070a6523c4aee4663a8538721b2b755c4962aafae0011e72/identify-2.6.19-py2.py3-none-any.whl", hash = "sha256:20e6a87f786f768c092a721ad107fc9df0eb89347be9396cadf3f4abbd1fb78a", size = 99397, upload-time = "2026-04-17T18:39:49.221Z" },
-]
-
-[[package]]
-name = "idna"
-version = "3.20"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f5/08/8eea9d4b8302028f3abb2c0813953f7aec26d33b7a8960ed760e65ff29fa/idna-3.20.tar.gz", hash = "sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44", size = 216463, upload-time = "2026-09-17T14:11:04.752Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl", hash = "sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c", size = 69583, upload-time = "2026-09-17T14:11:03.168Z" },
 ]
 
 [[package]]
@@ -283,50 +215,19 @@ wheels = [
 ]
 
 [[package]]
-name = "llm-plan"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "glfw", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "gymnasium", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "httpx", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "mujoco", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "opencv-python", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pillow", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "roboticstoolbox-python", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "scipy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "spatialmath-python", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "glfw", specifier = "==2.10.2" },
-    { name = "gymnasium", specifier = "==1.3.0" },
-    { name = "httpx", specifier = "==0.28.1" },
-    { name = "mujoco", specifier = "==3.11.0" },
-    { name = "numpy", specifier = "==2.2.6" },
-    { name = "opencv-python", specifier = "==4.13.0.92" },
-    { name = "pillow", specifier = "==12.3.0" },
-    { name = "roboticstoolbox-python", specifier = "==1.3.1" },
-    { name = "scipy", specifier = "==1.18.0" },
-    { name = "spatialmath-python", specifier = "==1.1.16" },
-]
-
-[[package]]
 name = "matplotlib"
 version = "3.11.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "contourpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "cycler", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "fonttools", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "kiwisolver", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "packaging", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pillow", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pyparsing", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "python-dateutil", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "contourpy" },
+    { name = "cycler" },
+    { name = "fonttools" },
+    { name = "kiwisolver" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pillow" },
+    { name = "pyparsing" },
+    { name = "python-dateutil" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/e7/c8/9aa712a0afb882649424dd8de8ad9aa6235e796e84c6052e8f6dc1598d0d/matplotlib-3.11.2.tar.gz", hash = "sha256:cec596316640f2b394b8f0daa0ea61a8eae82d017b620b9f202befb972a59ea4", size = 32660610, upload-time = "2026-09-11T19:05:31.214Z" }
 wheels = [
@@ -342,11 +243,11 @@ name = "mujoco"
 version = "3.11.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "absl-py", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "etils", extra = ["epath"], marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "glfw", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pyopengl", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "absl-py" },
+    { name = "etils", extra = ["epath"] },
+    { name = "glfw" },
+    { name = "numpy" },
+    { name = "pyopengl" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/3b/2d/290f3f4062eec1c0d5246de0a75f1b18b59a1961081f49ddc97333fc8263/mujoco-3.11.0.tar.gz", hash = "sha256:390856102af9547dfd87cb2791eb105a3d2e00a37323fe9a12ed17e512aff1a6", size = 1139880, upload-time = "2026-07-28T01:23:32.252Z" }
 wheels = [
@@ -379,22 +280,6 @@ wheels = [
 ]
 
 [[package]]
-name = "opencv-python"
-version = "4.13.0.92"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3e/51/82fed528b45173bf629fa44effb76dff8bc9f4eeaee759038362dfa60237/opencv_python-4.13.0.92-cp37-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:0bc2596e68f972ca452d80f444bc404e08807d021fbba40df26b61b18e01838a", size = 47685527, upload-time = "2026-02-05T06:59:11.24Z" },
-    { url = "https://files.pythonhosted.org/packages/db/07/90b34a8e2cf9c50fe8ed25cac9011cde0676b4d9d9c973751ac7616223a2/opencv_python-4.13.0.92-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:402033cddf9d294693094de5ef532339f14ce821da3ad7df7c9f6e8316da32cf", size = 70460872, upload-time = "2026-02-05T06:59:19.162Z" },
-    { url = "https://files.pythonhosted.org/packages/02/6d/7a9cc719b3eaf4377b9c2e3edeb7ed3a81de41f96421510c0a169ca3cfd4/opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:bccaabf9eb7f897ca61880ce2869dcd9b25b72129c28478e7f2a5e8dee945616", size = 46708208, upload-time = "2026-02-05T06:59:15.419Z" },
-    { url = "https://files.pythonhosted.org/packages/fd/55/b3b49a1b97aabcfbbd6c7326df9cb0b6fa0c0aefa8e89d500939e04aa229/opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:620d602b8f7d8b8dab5f4b99c6eb353e78d3fb8b0f53db1bd258bb1aa001c1d5", size = 72927042, upload-time = "2026-02-05T06:59:23.389Z" },
-    { url = "https://files.pythonhosted.org/packages/fb/17/de5458312bcb07ddf434d7bfcb24bb52c59635ad58c6e7c751b48949b009/opencv_python-4.13.0.92-cp37-abi3-win32.whl", hash = "sha256:372fe164a3148ac1ca51e5f3ad0541a4a276452273f503441d718fab9c5e5f59", size = 30932638, upload-time = "2026-02-05T07:02:14.98Z" },
-    { url = "https://files.pythonhosted.org/packages/e9/a5/1be1516390333ff9be3a9cb648c9f33df79d5096e5884b5df71a588af463/opencv_python-4.13.0.92-cp37-abi3-win_amd64.whl", hash = "sha256:423d934c9fafb91aad38edf26efb46da91ffbc05f3f59c4b0c72e699720706f5", size = 40212062, upload-time = "2026-02-05T07:02:12.724Z" },
-]
-
-[[package]]
 name = "packaging"
 version = "26.3"
 source = { registry = "https://pypi.org/simple" }
@@ -408,10 +293,10 @@ name = "pgraph-python"
 version = "0.6.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "matplotlib", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "scipy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "spatialmath-python", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "scipy" },
+    { name = "spatialmath-python" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/53/20/2e71ec7098143e29a7af91b015905471ff1f9d91777943c7c199505a5cc5/pgraph_python-0.6.5.tar.gz", hash = "sha256:2462d0fd6a7278779f37fc8a582d1817ab6930c4a2b83cad0ee93256637f7f76", size = 312431, upload-time = "2026-08-16T02:29:24.834Z" }
 wheels = [
@@ -447,11 +332,11 @@ name = "pre-commit"
 version = "4.6.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cfgv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "identify", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "nodeenv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pyyaml", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "virtualenv", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "cfgv" },
+    { name = "identify" },
+    { name = "nodeenv" },
+    { name = "pyyaml" },
+    { name = "virtualenv" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/74/89/1f3e8e1fc3e97de0fa963495832f581f025f29471602a309e48808244292/pre_commit-4.6.2.tar.gz", hash = "sha256:8f5d7bfb021ecdbcd9d49d89847082dd24172ccde534390081a679ad046e2441", size = 198670, upload-time = "2026-08-10T22:07:18.421Z" }
 wheels = [
@@ -490,7 +375,7 @@ name = "python-dateutil"
 version = "2.9.0.post0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "six", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "six" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/66/c0/0c8b6ad9f17a802ee498c46e004a0eb49bc148f2fd230864601a86dcf6db/python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3", size = 342432, upload-time = "2024-03-01T18:36:20.211Z" }
 wheels = [
@@ -502,7 +387,7 @@ name = "python-discovery"
 version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "filelock", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "filelock" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0c/57/250bd238b966cece44328235eb85290045d059265fdaf7527a3a958123db/python_discovery-1.6.1.tar.gz", hash = "sha256:cf87d3627dfb4412437fdd5b13eae402607722998d21567993aedbc59b23c15e", size = 84338, upload-time = "2026-09-18T01:31:53.971Z" }
 wheels = [
@@ -530,16 +415,16 @@ name = "roboticstoolbox-python"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ansitable", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "colored", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "matplotlib", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pgraph-python", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "progress", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "rtb-data", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "scipy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "spatialmath-python", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "ansitable" },
+    { name = "colored" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pgraph-python" },
+    { name = "progress" },
+    { name = "rtb-data" },
+    { name = "scipy" },
+    { name = "spatialmath-python" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/be/c5/5f4e7c84d8a41566ea1e2d243d169035207add43c9197394d0d32ed722e7/roboticstoolbox_python-1.3.1.tar.gz", hash = "sha256:7addc056c426153a45f7bf022b0951b515dd8410a49105bf0e9ae00caac69546", size = 15449006, upload-time = "2026-07-03T08:14:20.163Z" }
 wheels = [
@@ -562,7 +447,7 @@ name = "scipy"
 version = "1.18.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "numpy" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a7/25/c2700dfaf6442b4effaa91af24ebce5dc9d31bb4a69706313aae70d72cd0/scipy-1.18.0.tar.gz", hash = "sha256:67b2ad2ad54c72ca6d04975a9b2df8c3638c34ddd5b28738e94fc2b57929d378", size = 30774447, upload-time = "2026-06-19T15:01:43.456Z" }
 wheels = [
@@ -584,16 +469,41 @@ wheels = [
 ]
 
 [[package]]
+name = "so101-vla-sim"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "glfw" },
+    { name = "gymnasium" },
+    { name = "mujoco" },
+    { name = "numpy" },
+    { name = "roboticstoolbox-python" },
+    { name = "scipy" },
+    { name = "spatialmath-python" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "glfw", specifier = "==2.10.2" },
+    { name = "gymnasium", specifier = "==1.3.0" },
+    { name = "mujoco", specifier = "==3.11.0" },
+    { name = "numpy", specifier = "==2.2.6" },
+    { name = "roboticstoolbox-python", specifier = "==1.3.1" },
+    { name = "scipy", specifier = "==1.18.0" },
+    { name = "spatialmath-python", specifier = "==1.1.16" },
+]
+
+[[package]]
 name = "spatialmath-python"
 version = "1.1.16"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ansitable", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "matplotlib", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "numpy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "pre-commit", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "scipy", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "typing-extensions", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "ansitable" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "pre-commit" },
+    { name = "scipy" },
+    { name = "typing-extensions" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/bb/ff/c0de46a8ad3b75fab07884533ec4585fce5b2b208cef0e3542c3d68f70f6/spatialmath_python-1.1.16.tar.gz", hash = "sha256:eb2f043b1c57baab034c01d6d3028eab80f5ec68eaa2ec89cb9572107c336a22", size = 205025, upload-time = "2026-04-29T14:45:16.576Z" }
 wheels = [
@@ -614,10 +524,10 @@ name = "virtualenv"
 version = "21.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "distlib", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "filelock", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "platformdirs", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "python-discovery", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "distlib" },
+    { name = "filelock" },
+    { name = "platformdirs" },
+    { name = "python-discovery" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/81/a3/4d9dede34649537601a64700558e350f43dd552a12db166e0ff1bc81087d/virtualenv-21.12.0.tar.gz", hash = "sha256:bc5923d9f3e25f4114d6335e99c265978386d3ce8a6a0ec061b18d9b1635b016", size = 5396320, upload-time = "2026-09-24T01:27:44.502Z" }
 wheels = [
