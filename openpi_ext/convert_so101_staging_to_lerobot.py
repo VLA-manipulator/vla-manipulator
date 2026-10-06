@@ -218,7 +218,6 @@ def convert_dataset(
                 tags=["so101", "mujoco", "openpi", "pi05"],
                 private=private,
                 push_videos=use_videos,
-                license="apache-2.0",
             )
     finally:
         stop_writer = getattr(dataset, "stop_image_writer", None)
