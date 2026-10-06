@@ -10,6 +10,10 @@ SO101 机械臂的仿真数据采集、OpenPI π0.5 微调和评估工程。
 - IK 专家抓取策略；
 - 20 Hz 同步示范采集；
 - 不依赖 LeRobot 的 staging 数据格式。
+- staging → LeRobot 转换器；
+- SO101 OpenPI 输入/输出适配器；
+- 基于官方配置组合的 `pi05_so101_lora`；
+- 训练、推理、磁盘检查和 checkpoint 归档脚本。
 
 ## 仓库结构
 
@@ -69,12 +73,19 @@ uv run python -m mj_env.scripts.collect_demonstrations `
 五条数据只用于验证“采集→转换→归一化→训练→推理”链路，不足以训练出
 可靠策略。流程跑通后再采集每个任务至少 100～200 条具有不同布局的成功轨迹。
 
-## 当前下一步
+## 服务器执行顺序
 
-1. 添加 SO101 的 OpenPI 输入/输出映射；
-2. 基于 `pi05_base` 定义 LoRA 训练配置；
-3. 转换五条 smoke 数据并计算 normalization statistics；
-4. 启动短训练，验证 checkpoint 和闭环推理链路。
+1. `bash scripts/prepare_openpi_so101.sh`
+2. 上传五条 staging 数据；
+3. `bash scripts/convert_dataset.sh`
+4. `bash scripts/compute_norm_stats.sh`
+5. `bash scripts/train_pi05_so101_lora.sh`（默认仅10步）；
+6. 启动 policy server，并使用 `mj_env.scripts.evaluate_openpi` 闭环评估。
+
+OpenPI 官方没有发布现成的 PI0.5 + SO101 LoRA 配置。本项目只组合官方
+`pi05_libero` 的 PI0.5 设置、官方低内存 LoRA 模型变体/冻结规则以及官方
+UR5/LIBERO 机器人适配方式。长训练前必须先验证10步训练、checkpoint恢复和
+闭环推理。
 
 ## 测试
 

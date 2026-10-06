@@ -159,6 +159,8 @@ def convert_dataset(
     use_videos: bool = True,
     image_writer_threads: int = 4,
     dataset_factory: Callable[..., Any] | None = None,
+    push_to_hub: bool = False,
+    private: bool = True,
 ) -> tuple[int, int]:
     """Validate staging data, create LeRobot output, and return episode/frame totals."""
     input_root = Path(input_root).resolve()
@@ -211,6 +213,13 @@ def convert_dataset(
                     f"converted episode={record['episode_index']} frames={frame_count} task={task!r}",
                     flush=True,
                 )
+        if push_to_hub:
+            dataset.push_to_hub(
+                tags=["so101", "mujoco", "openpi", "pi05"],
+                private=private,
+                push_videos=use_videos,
+                license="apache-2.0",
+            )
     finally:
         stop_writer = getattr(dataset, "stop_image_writer", None)
         if callable(stop_writer):
@@ -229,6 +238,12 @@ def main() -> int:
         help="store individual images instead of MP4 videos (larger; useful for debugging)",
     )
     parser.add_argument("--image-writer-threads", type=int, default=4)
+    parser.add_argument("--push-to-hub", action="store_true")
+    parser.add_argument(
+        "--public",
+        action="store_true",
+        help="make a pushed dataset public (default is private)",
+    )
     args = parser.parse_args()
     if args.image_writer_threads < 0:
         parser.error("--image-writer-threads must be non-negative")
@@ -239,6 +254,8 @@ def main() -> int:
         args.repo_id,
         use_videos=not args.images,
         image_writer_threads=args.image_writer_threads,
+        push_to_hub=args.push_to_hub,
+        private=not args.public,
     )
     print(f"conversion complete: episodes={episodes} frames={frames} output={args.output_root}")
     return 0
