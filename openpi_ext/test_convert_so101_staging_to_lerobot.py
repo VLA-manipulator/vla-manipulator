@@ -92,7 +92,11 @@ class ConverterTest(unittest.TestCase):
             self.assertEqual(captured["features"]["state"]["shape"], (6,))
             self.assertEqual(captured["features"]["image"]["shape"], (8, 10, 3))
             self.assertEqual(len(fake.frames), 2)
-            self.assertEqual(fake.frames[1]["timestamp"], 0.05)
+            timestamp = fake.frames[1]["timestamp"]
+            self.assertIsInstance(timestamp, np.ndarray)
+            self.assertEqual(timestamp.dtype, np.float32)
+            self.assertEqual(timestamp.shape, ())
+            self.assertAlmostEqual(float(timestamp), 0.05)
             self.assertEqual(fake.saved_episodes, 1)
             self.assertTrue(fake.stopped)
 
