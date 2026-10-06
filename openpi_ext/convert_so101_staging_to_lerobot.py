@@ -204,12 +204,9 @@ def convert_dataset(
                             "state": episode["state"][index],
                             "actions": episode["actions"][index],
                             "task": task,
-                            # The LeRobot revision pinned by OpenPI validates
-                            # floating-point features as NumPy arrays, including
-                            # scalar metadata such as timestamps.
-                            "timestamp": np.asarray(
-                                episode["timestamp"][index], dtype=np.float32
-                            ),
+                            # Staging timestamps were validated above. LeRobot
+                            # generates its version-specific timestamp value
+                            # from frame_index / fps in add_frame().
                         }
                     )
                 dataset.save_episode()
