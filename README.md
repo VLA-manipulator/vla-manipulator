@@ -96,3 +96,6 @@ uv run python -m unittest \
 ```
 
 更详细的仿真说明见 [`simulation/README.md`](simulation/README.md)。
+
+8 种物体各采集 40 条成功示范的服务器全流程，见
+[`docs/SO101_PI05_FULL_WORKFLOW.md`](docs/SO101_PI05_FULL_WORKFLOW.md)。

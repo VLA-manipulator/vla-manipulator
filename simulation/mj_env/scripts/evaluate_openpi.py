@@ -86,7 +86,8 @@ def main() -> int:
         f"success_rate={successes}/{args.episodes}={rate:.3f} "
         f"rough_95pct_half_width={wilson_half_width:.3f}"
     )
-    return 0 if successes else 1
+    # Zero successes is a valid evaluation result, not a runtime error.
+    return 0
 
 
 if __name__ == "__main__":

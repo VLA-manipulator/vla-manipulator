@@ -30,6 +30,14 @@ def main() -> int:
     group.add_argument("--object", choices=objects.NAMES)
     group.add_argument("--all", action="store_true")
     parser.add_argument("--episodes", type=int, default=2, help="attempts per object")
+    parser.add_argument(
+        "--successes-per-object", type=int,
+        help="save this many successful episodes per object; use with --max-attempts-per-object",
+    )
+    parser.add_argument(
+        "--max-attempts-per-object", type=int,
+        help="stop retrying each object after this many attempts",
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--height", type=int, default=224)
@@ -39,6 +47,13 @@ def main() -> int:
 
     if args.episodes <= 0:
         parser.error("--episodes must be positive")
+    if args.successes_per_object is not None:
+        if args.successes_per_object <= 0:
+            parser.error("--successes-per-object must be positive")
+        if args.max_attempts_per_object is None or args.max_attempts_per_object < args.successes_per_object:
+            parser.error("--max-attempts-per-object must be at least --successes-per-object")
+    elif args.max_attempts_per_object is not None:
+        parser.error("--max-attempts-per-object requires --successes-per-object")
     if args.height <= 0 or args.width <= 0:
         parser.error("--height and --width must be positive")
     if args.root.exists():
@@ -65,9 +80,15 @@ def main() -> int:
     results_path = args.root / "collection_results.jsonl"
     saved = 0
     attempted = 0
+    shortfalls = []
     try:
         for target in targets:
-            for offset in range(args.episodes):
+            target_saved = 0
+            target_attempted = 0
+            attempt_limit = args.max_attempts_per_object or args.episodes
+            for offset in range(attempt_limit):
+                if args.successes_per_object is not None and target_saved >= args.successes_per_object:
+                    break
                 seed = args.seed + offset
                 task = objects.BY_NAME[target].prompt
                 recorder = SynchronizedEpisodeRecorder(
@@ -85,6 +106,7 @@ def main() -> int:
                     on_frame=recorder.on_frame,
                 )
                 attempted += 1
+                target_attempted += 1
                 record = {
                     **result,
                     "seed": seed,
@@ -95,18 +117,26 @@ def main() -> int:
                 if result["success"]:
                     dataset.save_episode(metadata=record)
                     saved += 1
+                    target_saved += 1
                 else:
                     dataset.clear_episode_buffer()
                 with results_path.open("a", encoding="utf-8") as handle:
                     handle.write(json.dumps(record, ensure_ascii=False) + "\n")
                 print(
                     f"{target} seed={seed} outcome={result['outcome']} "
-                    f"frames={recorder.frame_index} saved={record['saved']}"
+                    f"frames={recorder.frame_index} saved={record['saved']} "
+                    f"target_saved={target_saved}"
                 )
+            print(f"{target}: saved {target_saved}/{target_attempted} attempts", flush=True)
+            if args.successes_per_object is not None and target_saved < args.successes_per_object:
+                shortfalls.append(f"{target}={target_saved}/{args.successes_per_object}")
     finally:
         env.close()
 
     print(f"saved {saved}/{attempted} successful episodes to {args.root}")
+    if shortfalls:
+        print("success target not reached: " + ", ".join(shortfalls))
+        return 2
     return 0 if saved else 1
 
 
