@@ -30,6 +30,22 @@ uv run python -m mj_env.scripts.scripted_pick --object cube_red --episodes 5
 每次 reset 会依据 seed 随机采样物体 XY 位置和绕 Z 轴朝向。专家策略默认还会
 轻微随机化机械臂初始关节姿态，并根据新物体位置重新求解 IK。
 
+## 新场景与任务
+
+原八物体抓取仍默认使用 `mj_env/assets/scene.xml`。新增 O1–O5、P1–P4
+任务使用 `mj_env/assets/scenes/` 中的组合场景和 `TaskEnv`，共享底座、机械臂、
+动作空间及夹爪碰撞模型；O1 与 P1 共用 `p1_place_disc.xml`。
+
+```powershell
+uv run python -m mj_env.specs
+uv run python -m mj_env.scripts.scripted_pick_place `
+  --task p1_place_disc --episodes 5 --seed 0 --headless --require 0
+```
+
+`--require 0` 仅用于检查轨迹并显示失败；正式验收应使用默认的 100% 成功率
+阈值。新任务的专家并非在所有随机布局下都稳定，采集前应逐任务、逐种子验证。
+本次合并不改动原有 staging 采集和微调代码。
+
 ## 采集 staging 数据
 
 ```powershell
@@ -70,6 +86,9 @@ uv run python -m mj_env.scripts.collect_demonstrations `
 | `mj_env/adapters.py` | MuJoCo 弧度与 SO101 电机坐标转换 |
 | `mj_env/demonstrations.py` | 同步帧记录和 staging 存储 |
 | `mj_env/scripts/scripted_pick.py` | IK 专家策略 |
+| `mj_env/scripts/scripted_pick_place.py` | 新任务抓取、搬运和放置专家 |
+| `mj_env/task_env.py`、`mj_env/specs/` | 组合场景任务环境和任务定义 |
+| `mj_env/scene.py`、`mj_env/gripper.py` | 夹爪碰撞垫与开口标定 |
 | `mj_env/scripts/collect_demonstrations.py` | 示范采集入口 |
 | `mj_env/scripts/view_scene.py` | 本地可视化入口 |
 | `so101/` | 运动学、MJCF/URDF 和网格资源 |
@@ -77,7 +96,7 @@ uv run python -m mj_env.scripts.collect_demonstrations `
 ## 测试
 
 ```powershell
-uv run python -m unittest mj_env.test_demonstrations
+uv run python -m unittest mj_env.test_gripper mj_env.test_criteria mj_env.test_demonstrations
 ```
 
 无显示器的 Linux 服务器如需离屏渲染，可设置 `MUJOCO_GL=egl`。

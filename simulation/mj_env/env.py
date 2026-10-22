@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Sequence
 
 import gymnasium as gym
@@ -14,10 +15,10 @@ from so101 import ARM_JOINT_NAMES, SO101
 from . import layout, objects
 from .glfw_viewer import GLFWViewer
 from .scene import (
-    FIXED_FINGER_GEOM,
+    FIXED_PAD_GEOM,
     GRASP_ZONE_HALF_ANGLE,
     GRASP_ZONE_RADIUS,
-    MOVING_FINGER_GEOM,
+    MOVING_PAD_GEOM,
     SCENE_CAMERA,
     TABLE_HEIGHT,
     TCP_SITE,
@@ -77,6 +78,9 @@ class SO101TabletopEnv(gym.Env):
         max_episode_steps: int = 300,
         target_object: str | None = None,
         objects_subset: Sequence[str] | None = None,
+        prop_bodies: Sequence[str] | None = None,
+        prop_grip_widths: dict[str, float] | None = None,
+        scene_xml: str | Path | None = None,
         task: str | None = None,
         show_viewer_ui: bool = False,
         viewer_observation_overlays: bool = True,
@@ -84,15 +88,34 @@ class SO101TabletopEnv(gym.Env):
         super().__init__()
         if render_mode not in self.metadata["render_modes"]:
             raise ValueError(f"unsupported render_mode={render_mode!r}")
-        selected = tuple(objects.NAMES if objects_subset is None else objects_subset)
-        if not selected:
-            raise ValueError("objects_subset must contain at least one object")
-        if len(set(selected)) != len(selected) or any(name not in objects.BY_NAME for name in selected):
-            raise ValueError(f"unknown or duplicate object in objects_subset: {selected!r}")
-        if target_object is not None and target_object not in objects.BY_NAME:
-            raise ValueError(f"unknown target_object={target_object!r}")
+        #: Two ways to say which bodies the episode is about.  ``objects_subset``
+        #: selects from the legacy eight-object catalogue (scene.xml);
+        #: ``prop_bodies`` names bodies declared by a composed scene
+        #: (``assets/scenes/*.xml``).  Keeping both means the existing
+        #: collection pipeline keeps working untouched.
+        self.catalogue_driven = prop_bodies is None
+        if self.catalogue_driven:
+            selected = tuple(objects.NAMES if objects_subset is None else objects_subset)
+            if not selected:
+                raise ValueError("objects_subset must contain at least one object")
+            if len(set(selected)) != len(selected) or any(
+                name not in objects.BY_NAME for name in selected
+            ):
+                raise ValueError(f"unknown or duplicate object in objects_subset: {selected!r}")
+            if target_object is not None and target_object not in objects.BY_NAME:
+                raise ValueError(f"unknown target_object={target_object!r}")
+        else:
+            if objects_subset is not None:
+                raise ValueError(
+                    "pass either objects_subset (catalogue) or prop_bodies (composed scene)"
+                )
+            selected = tuple(prop_bodies)
+            if not selected:
+                raise ValueError("prop_bodies must contain at least one body")
+            if len(set(selected)) != len(selected):
+                raise ValueError(f"duplicate body in prop_bodies: {selected!r}")
         if target_object is not None and target_object not in selected:
-            raise ValueError(f"target_object={target_object!r} is not in objects_subset={selected!r}")
+            raise ValueError(f"target_object={target_object!r} is not in {selected!r}")
         self.render_mode = render_mode
         self.image_height, self.image_width = image_size
         self.max_episode_steps = int(max_episode_steps)
@@ -100,7 +123,7 @@ class SO101TabletopEnv(gym.Env):
         self.viewer_observation_overlays = bool(viewer_observation_overlays)
         self.objects_subset = selected
 
-        self.model = build_model()
+        self.model = build_model(scene_xml)
         self.data = mujoco.MjData(self.model)
         self.frame_skip = max(1, round(1.0 / (control_hz * self.model.opt.timestep)))
         self.control_hz = 1.0 / (self.frame_skip * self.model.opt.timestep)
@@ -109,13 +132,22 @@ class SO101TabletopEnv(gym.Env):
         self.robot = SO101()
         self._resolve_indices()
 
-        self._objects = objects.measure_all(self.model)
+        self._objects = (
+            objects.measure_all(self.model)
+            if self.catalogue_driven
+            else {
+                name: objects.measure_body(
+                    self.model, name, grip_width=(prop_grip_widths or {}).get(name)
+                )
+                for name in self.objects_subset
+            }
+        )
         self._footprints = [self._objects[name].footprint for name in self.objects_subset]
 
         self._default_target = target_object
         self._default_task = task
         self.target_object = target_object or self.objects_subset[0]
-        self.task = task or objects.BY_NAME[self.target_object].prompt
+        self.task = task or self._prompt_for(self.target_object)
         self._step_count = 0
         self._layout_fallback = False
         #: Grasp state accumulated over the last control step; ``None`` outside
@@ -144,6 +176,12 @@ class SO101TabletopEnv(gym.Env):
 
     # -- model wiring --------------------------------------------------------
 
+    def _prompt_for(self, name: str) -> str:
+        """Default natural-language prompt for a target body."""
+        if self.catalogue_driven and name in objects.BY_NAME:
+            return objects.BY_NAME[name].prompt
+        return name
+
     def _resolve_indices(self) -> None:
         arm_qpos, _ = self.robot.resolve_joint_state_indices(self.model)
         gripper_qpos = self.model.jnt_qposadr[self._id(mujoco.mjtObj.mjOBJ_JOINT, "gripper")]
@@ -155,8 +193,8 @@ class SO101TabletopEnv(gym.Env):
 
         self._tcp_site_id = self._id(mujoco.mjtObj.mjOBJ_SITE, TCP_SITE)
         self._finger_geom_ids = (
-            self._id(mujoco.mjtObj.mjOBJ_GEOM, FIXED_FINGER_GEOM),
-            self._id(mujoco.mjtObj.mjOBJ_GEOM, MOVING_FINGER_GEOM),
+            self._id(mujoco.mjtObj.mjOBJ_GEOM, FIXED_PAD_GEOM),
+            self._id(mujoco.mjtObj.mjOBJ_GEOM, MOVING_PAD_GEOM),
         )
 
     def _id(self, obj_type: mujoco.mjtObj, name: str) -> int:
@@ -174,12 +212,12 @@ class SO101TabletopEnv(gym.Env):
         requested = options.get("target_object", self._default_target)
         if requested is None:
             requested = self.objects_subset[int(self.np_random.integers(len(self.objects_subset)))]
-        elif requested not in objects.BY_NAME:
+        elif self.catalogue_driven and requested not in objects.BY_NAME:
             raise ValueError(f"unknown target_object={requested!r}")
+        elif requested not in self.objects_subset:
+            raise ValueError(f"target_object={requested!r} is not in {self.objects_subset!r}")
         self.target_object = requested
-        self.task = options.get(
-            "task", self._default_task or objects.BY_NAME[self.target_object].prompt
-        )
+        self.task = options.get("task", self._default_task or self._prompt_for(self.target_object))
 
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[self._qpos_ids] = HOME_QPOS
@@ -207,7 +245,7 @@ class SO101TabletopEnv(gym.Env):
             bounds_y=_TABLE_BOUNDS_Y,
         )
         placed_names = set(self.objects_subset)
-        for name in objects.NAMES:
+        for name in self._objects:
             metrics = self._objects[name]
             if name not in placed_names:
                 # Keep catalogue bodies in the compiled model for stable

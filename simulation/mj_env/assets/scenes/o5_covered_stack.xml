@@ -1,0 +1,44 @@
+<mujoco model="so101_o5_covered_stack">
+  <!-- O5: the target is buried under another object.
+
+       The cover starts resting on the target, so the target cannot be grasped at
+       all until the cover is moved.  That is the only level in this ladder whose
+       difficulty is *order* rather than geometry: the obstacle is not something
+       to squeeze past, it is something to deal with first, and the whole episode
+       is roughly twice as long as any other level's.
+
+       `park_spot` is where the cover has to go.  It carries no geometry -- a
+       marker body the layout positions on every reset -- so it never collides
+       with anything and never appears in either camera.  Giving the cover a
+       visible destination would turn this into a second placement task and
+       change what the level measures. -->
+
+  <include file="../../../so101/assets/so101_new_calib.xml"/>
+  <compiler angle="radian" meshdir="../../../so101/assets/assets" autolimits="true"/>
+
+  <include file="../base_table.xml"/>
+
+  <worldbody>
+    <body name="object" pos="0.220 0.110 0.0175" childclass="table_object">
+      <freejoint name="object_free"/>
+      <geom name="object_geom" type="box" size="0.0175 0.0175 0.0175" material="object_red"/>
+    </body>
+
+    <!-- Starts stacked on the target: centre at 17.5 + 35 mm. -->
+    <body name="cover" pos="0.220 0.110 0.0525" childclass="table_object">
+      <freejoint name="cover_free"/>
+      <geom name="cover_geom" type="box" size="0.0175 0.0175 0.0175" material="object_grey"/>
+    </body>
+
+    <body name="place_target" pos="0.200 -0.130 0" childclass="decor">
+      <geom name="place_target_geom" type="cylinder" size="0.045 0.002"
+            pos="0 0 0.002" material="goal_disc"/>
+      <site name="place_target_site" pos="0 0 0.004" size="0.005"/>
+    </body>
+
+    <!-- Collision-free, invisible marker: where the cover gets parked. -->
+    <body name="park_spot" pos="0.180 0.200 0" childclass="decor">
+      <site name="park_spot_site" pos="0 0 0.002" size="0.005"/>
+    </body>
+  </worldbody>
+</mujoco>

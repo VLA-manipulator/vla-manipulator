@@ -1,0 +1,40 @@
+<mujoco model="so101_o2_thin_bar">
+  <!-- O2: the object can only be grasped across its narrow dimension.
+
+       A 70 x 16 x 22 mm bar.  Its long axis is the body's local +x, which is the
+       convention `grasp_axis_yaw` reads, so the jaw hinge lines up with the bar
+       and the pads close across the 16 mm width.  Misalign the jaw by a quarter
+       turn -- which is what "aim at the centroid without looking" produces --
+       and the pads meet the 70 mm faces instead and never close: the level
+       punishes not perceiving the object's heading.
+
+       Why a rectangular bar and not the dumbbell this level started as: a
+       cylindrical handle is a *line* contact, and the carry's tool rotation
+       drifts 20-50 degrees (measured, docs/SCENE_TASK_SYSTEM_PLAN.md 10.1), which
+       turns line contact into point contact and sheds the object after 8 frames
+       of carry.  Flat faces survive the same drift, so the difficulty stays a
+       perception problem instead of an expert limitation.
+
+       The bar is lighter than the cube (12 g vs 21 g), so it is not the load
+       that makes it hard. -->
+
+  <include file="../../../so101/assets/so101_new_calib.xml"/>
+  <compiler angle="radian" meshdir="../../../so101/assets/assets" autolimits="true"/>
+
+  <include file="../base_table.xml"/>
+
+  <worldbody>
+    <!-- Body origin rests 11 mm up: the bar's half height.  Half-extents are
+         (length/2, width/2, height/2) with the length along local +x. -->
+    <body name="object" pos="0.220 0.000 0.011" childclass="table_object">
+      <freejoint name="object_free"/>
+      <geom name="object_geom" type="box" size="0.035 0.008 0.011" material="object_orange"/>
+    </body>
+
+    <body name="place_target" pos="0.200 -0.130 0" childclass="decor">
+      <geom name="place_target_geom" type="cylinder" size="0.045 0.002"
+            pos="0 0 0.002" material="goal_disc"/>
+      <site name="place_target_site" pos="0 0 0.004" size="0.005"/>
+    </body>
+  </worldbody>
+</mujoco>
