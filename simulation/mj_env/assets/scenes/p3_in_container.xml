@@ -1,0 +1,53 @@
+<mujoco model="so101_p3_in_container">
+  <!-- P3: the object has to go *inside* something, not onto a flat marker.
+
+       The container is four walls around a square cavity, and the criterion is
+       "the cube is inside the cavity and below the rim".  That is a different
+       kind of difficulty from P1's disc: the goal is no longer just a place on
+       the table, it is a volume, and the hand has to descend into it.
+
+       Sizes come from docs/SO101_ENVELOPE.md:
+
+       * cavity half-width 55 mm.  The jaw at the descent aperture is 82.8 mm
+         across and *asymmetric about the aperture centre* (48.9 mm on the
+         fixed-finger side), so the inner half-width has to clear the wider side
+         with a margin -- 55 mm leaves 6 mm, and 106 mm is the hard floor;
+       * wall height 45 mm.  The trajectory's vertical occupancy profile puts the
+         lowest arm material at radius 55 mm at 154 mm, so a 45 mm wall is
+         comfortably clear while still being tall enough to be a wall;
+       * wall thickness 6 mm and a 116 mm outer span, so the container's capsule
+         footprint is a 61 mm half-extent.
+
+       `container_cavity` is a zero-collision box that *declares* the cavity;
+       mj_env/task_env.py::inside_container reads it rather than guessing wall
+       thickness from an outer bounding box. -->
+
+  <include file="../../../so101/assets/so101_new_calib.xml"/>
+  <compiler angle="radian" meshdir="../../../so101/assets/assets" autolimits="true"/>
+
+  <include file="../base_table.xml"/>
+
+  <worldbody>
+    <body name="object" pos="0.220 0.110 0.0175" childclass="table_object">
+      <freejoint name="object_free"/>
+      <geom name="object_geom" type="box" size="0.0175 0.0175 0.0175" material="object_red"/>
+    </body>
+
+    <!-- One body so the whole container moves and rotates as a unit.
+         Inner cavity 120 x 120 mm (half 60), wall thickness 6, outer half 66.
+         The first version used a 110 mm cavity -- 6 mm of nominal clearance on
+         the jaw's wider side -- and the scene self-test caught the fingers
+         grazing a wall by 0.54 mm on the way in.  Nominal clearance is not
+         enough when the fixed finger hangs below the aperture. -->
+    <body name="container" pos="0.210 -0.110 0" childclass="structure">
+      <geom name="container_wall_x_pos" type="box" pos="0.063 0 0.0225" size="0.003 0.066 0.0225"/>
+      <geom name="container_wall_x_neg" type="box" pos="-0.063 0 0.0225" size="0.003 0.066 0.0225"/>
+      <geom name="container_wall_y_pos" type="box" pos="0 0.063 0.0225" size="0.060 0.003 0.0225"/>
+      <geom name="container_wall_y_neg" type="box" pos="0 -0.063 0.0225" size="0.060 0.003 0.0225"/>
+      <!-- The declared cavity: visual-only, and what the criterion measures. -->
+      <geom name="container_cavity" type="box" pos="0 0 0.0225" size="0.060 0.060 0.0225"
+            contype="0" conaffinity="0" group="2"/>
+      <site name="container_site" pos="0 0 0.045" size="0.005"/>
+    </body>
+  </worldbody>
+</mujoco>

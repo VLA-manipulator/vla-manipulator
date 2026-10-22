@@ -1,0 +1,55 @@
+<mujoco model="so101_o3_wrist_occlusion">
+  <!-- O3: the wrist camera's view of the grasp point is partly blocked.
+
+       The original design for this slot was a board hung under the *top-down*
+       camera, and M0 measured it infeasible: the top-down camera looks almost
+       straight down, so a board is either close enough to the object to sit in
+       the jaw corridor or tall enough to run into the arm, and the two
+       constraints never meet (69 candidate boards, one without arm
+       interference).
+
+       The wrist camera is different: it is 60 mm from the grasp point, so a wall
+       beside the object enters its frame at a height the arm clears easily.  That
+       turns the level into "the object is visible but partly hidden" -- the
+       imaging sibling of O4's geometric difficulty, and the natural pair with
+       the underwater axis.
+
+       The wall is one body so the layout can place it as a rigid offset in the
+       *object's* frame, exactly like O4's guide walls: the camera's azimuth
+       relative to the object is fixed (the wrist roll is a function of the
+       object's heading), so a wall fixed in the object's frame always sits in the
+       same place in the camera's view.
+
+       Offset, azimuth and height are set in mj_env/specs/family_o.py from
+       scripts/occlusion_probe.py measurements, not from a drawing. -->
+
+  <include file="../../../so101/assets/so101_new_calib.xml"/>
+  <compiler angle="radian" meshdir="../../../so101/assets/assets" autolimits="true"/>
+
+  <include file="../base_table.xml"/>
+
+  <worldbody>
+    <body name="object" pos="0.220 0.000 0.0175" childclass="table_object">
+      <freejoint name="object_free"/>
+      <geom name="object_geom" type="box" size="0.0175 0.0175 0.0175" material="object_red"/>
+    </body>
+
+    <!-- Measured by scripts/occlusion_probe.py: 100 x 6 x 46 mm at 76 mm from the
+         target's centre, azimuth 0 in the target's frame.  That hides 13.5% of
+         the target's pixels from the wrist camera while staying 13.6 mm clear of
+         every robot geom and 8.4 mm clear of the target's rotational sweep.
+         Nothing larger is available: the constraint is not the arm (a 46 mm
+         plate is easily cleared) but the *target itself* -- its corners sweep a
+         24.7 mm circle, so a plate closer than ~76 mm either collides with the
+         cube at some headings or with the fingers. -->
+    <body name="occluder" pos="0.220 0.076 0" childclass="structure">
+      <geom name="occluder_geom" type="box" pos="0 0 0.023" size="0.050 0.003 0.023"/>
+    </body>
+
+    <body name="place_target" pos="0.200 -0.130 0" childclass="decor">
+      <geom name="place_target_geom" type="cylinder" size="0.045 0.002"
+            pos="0 0 0.002" material="goal_disc"/>
+      <site name="place_target_site" pos="0 0 0.004" size="0.005"/>
+    </body>
+  </worldbody>
+</mujoco>

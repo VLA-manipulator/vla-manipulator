@@ -49,8 +49,11 @@ from mj_env.env import HOME_QPOS, SO101TabletopEnv
 
 #: Extra jaw opening over the object's width while approaching, and how far
 #: past the object's width the jaw is commanded so the pads keep pressing.
+#: The squeeze is the servo error the contact needs in order to carry load, so
+#: it also sets how far the pads sink into the object: 4 mm holds every
+#: catalogue object while keeping the finger body clear of it.
 JAW_CLEARANCE = 0.022
-JAW_SQUEEZE = 0.006
+JAW_SQUEEZE = 0.004
 
 #: Half-gap left between each pad and the object while descending.  The fixed
 #: finger does not move when the jaw opens, so aiming the closed aperture at
@@ -58,7 +61,7 @@ JAW_SQUEEZE = 0.006
 #: down it -- enough to tip a cube over before the jaw ever closes.  Aiming a
 #: slightly wider aperture instead centres the object between the pads with
 #: clearance on both sides.
-PAD_CLEARANCE = 0.004
+PAD_CLEARANCE = 0.006
 
 #: Elbow-up seed for the planar joints.  ``inverse_pose`` does no random
 #: restarts, so seeding shoulder_pan and wrist_roll near their analytic values
@@ -154,12 +157,28 @@ class PickTuning:
     steps_hold: int = 10
 
 
+def is_sphere(env: SO101TabletopEnv, name: str) -> bool:
+    """Whether a body is a ball, judged from its geoms rather than its name.
+
+    The catalogue calls them ``sphere_blue`` and friends, but composed scenes
+    name their props ``object`` or ``cover``, so a name lookup in
+    :data:`mj_env.objects.BY_NAME` raises for every level scene.
+    """
+    body_id = env._objects[name].body_id
+    geoms = [
+        g for g in range(env.model.ngeom) if env.model.geom_bodyid[g] == body_id
+    ]
+    return bool(geoms) and all(
+        env.model.geom_type[g] == mujoco.mjtGeom.mjGEOM_SPHERE for g in geoms
+    )
+
+
 def grasp_axis_yaw(env: SO101TabletopEnv, name: str) -> float:
     """Heading of the object's long axis, which the jaw hinge must match."""
     # A sphere has no observable grasp axis.  Its sampled MuJoCo yaw is
     # arbitrary; choose a jaw heading near the *current* wrist roll instead
     # of training the wrist to follow an invisible random angle.
-    if objects.BY_NAME[name].shape == "sphere":
+    if is_sphere(env, name):
         wrist_roll = float(env.data.qpos[env._qpos_ids[4]])
         psi = _wrap(_ROLL_OFFSET - wrist_roll)
         return -np.pi / 2.0 - psi
@@ -231,6 +250,22 @@ class GraspSolver:
                 return None
             previous = solution
         return previous
+
+    def aperture_centre(self, q: np.ndarray, offset: np.ndarray) -> np.ndarray:
+        """World position of the jaw aperture centre for a joint vector.
+
+        The aperture is where the *object* is, so this -- not the TCP site -- is
+        what a carry has to verify.  The IK's soft-axis fallback can hold the
+        TCP exactly while rotating the wrist, which slides the aperture
+        sideways; checking the TCP would not notice.
+        """
+        self._scratch.qpos[:] = self._model.qpos0
+        self._scratch.qpos[self._arm_qpos] = q
+        mujoco.mj_kinematics(self._model, self._scratch)
+        rotation = self._scratch.site_xmat[self._site_id].reshape(3, 3)
+        return (
+            self._scratch.site_xpos[self._site_id] + rotation @ offset
+        ).copy()
 
     def solve_aperture(
         self, aim: np.ndarray, psi: float, offset: np.ndarray, q0: np.ndarray
@@ -364,7 +399,7 @@ def run_episode(
     # the ball's invisible sampled yaw or a single arbitrary fixed heading.
     offsets = (
         np.linspace(-np.pi / 2.0, np.pi / 2.0, 9)
-        if objects.BY_NAME[target].shape == "sphere" else (0.0,)
+        if is_sphere(env, target) else (0.0,)
     )
     solutions = None
     best_wrist_travel = float("inf")

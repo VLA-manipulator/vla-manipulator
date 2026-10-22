@@ -1,0 +1,119 @@
+<mujoco model="so101_tabletop_base">
+  <!-- Shared table for every composed task level.  A level scene includes
+       this file and then adds only its own props, so the tabletop geometry,
+       lighting and the policy camera are identical across levels -- which is
+       what makes cross-level success-rate differences attributable to the
+       difficulty axis alone.
+
+       Deliberately has no <compiler> and no robot: meshdir is resolved
+       relative to the file that declares it, and the robot XML
+       (so101/assets/so101_new_calib.xml) already declares its own.  Each level
+       scene is the main file and declares angle/autolimits itself.
+
+       Copied verbatim from assets/scene.xml (the legacy eight-object scene),
+       minus the eight object bodies.  Do not "improve" the visual / light /
+       camera blocks here: the existing 320 episodes were collected against
+       exactly these settings. -->
+
+  <!-- The elliptic cone plus a high impedance ratio is the standard MuJoCo
+       recipe for grasps that do not slip out of a friction-driven gripper. -->
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"
+          cone="elliptic" impratio="10"/>
+
+  <visual>
+    <headlight diffuse="0.35 0.35 0.35" ambient="0.25 0.25 0.25" specular="0.1 0.1 0.1"/>
+    <global azimuth="150" elevation="-25" offwidth="1280" offheight="960"/>
+    <map znear="0.01" zfar="10"/>
+    <quality shadowsize="4096"/>
+  </visual>
+
+  <asset>
+    <texture name="skybox" type="skybox" builtin="gradient"
+             rgb1="0.55 0.62 0.72" rgb2="0.10 0.12 0.16" width="512" height="1024"/>
+    <texture name="floor_texture" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.16 0.17 0.19" rgb2="0.22 0.23 0.26"/>
+    <material name="floor_material" texture="floor_texture" texrepeat="6 6" texuniform="true"/>
+    <texture name="table_texture" type="2d" builtin="flat" width="256" height="256"
+             rgb1="0.78 0.70 0.58" rgb2="0.78 0.70 0.58"/>
+    <material name="table_material" texture="table_texture" specular="0.15" shininess="0.2"/>
+    <material name="frame_material" rgba="0.30 0.32 0.35 1"/>
+    <material name="backdrop_material" rgba="0.86 0.87 0.89 1"/>
+
+    <material name="object_red" rgba="0.85 0.09 0.07 1"/>
+    <material name="object_blue" rgba="0.08 0.28 0.85 1"/>
+    <material name="object_green" rgba="0.09 0.62 0.22 1"/>
+    <material name="object_yellow" rgba="0.95 0.72 0.05 1"/>
+    <material name="object_purple" rgba="0.52 0.14 0.76 1"/>
+    <material name="object_orange" rgba="0.95 0.36 0.05 1"/>
+    <!-- A neutral cube: used where an object must read as "not the target" in
+         both cameras, including underwater, where a saturated colour is what
+         disappears first. -->
+    <material name="object_grey" rgba="0.55 0.57 0.60 1"/>
+    <material name="metal" rgba="0.62 0.65 0.70 1" specular="0.9" shininess="0.6"/>
+    <!-- Static scenery (walls, fences, containers, occluders). -->
+    <material name="structure" rgba="0.36 0.38 0.42 1"/>
+    <material name="goal_disc" rgba="0.08 0.28 0.85 1"/>
+  </asset>
+
+  <default>
+    <!-- Objects are light (roughly 15-30 g) and high-friction so the SO101's
+         small jaw torque is enough to hold them.  condim=6 buys the last two
+         friction terms: torsional, which stops a grasped object spinning
+         between the pads, and rolling, without which a ball or a dumbbell
+         resting on its disc rims creeps across the table at a centimetre a
+         second on solver drift alone. -->
+    <default class="table_object">
+      <geom density="500" friction="1.5 0.05 0.0015" condim="6"
+            solref="0.008 1" solimp="0.95 0.99 0.001"/>
+    </default>
+    <default class="furniture">
+      <geom condim="3" friction="1.0 0.02 0.002"/>
+    </default>
+    <default class="decor">
+      <!-- Visual-only: no collisions, so table legs cannot trap an object. -->
+      <geom contype="0" conaffinity="0" group="2"/>
+    </default>
+    <default class="structure">
+      <!-- Static obstacles.  collision is on (walls must be solid) but they are
+           welded to the world, so they never move on their own. -->
+      <geom type="box" condim="3" friction="0.7 0.02 0.002"
+            solref="0.008 1" solimp="0.95 0.99 0.001" material="structure"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light name="key" pos="0.55 -0.45 1.30" dir="-0.35 0.30 -1" directional="true"
+           diffuse="0.50 0.50 0.50" specular="0.15 0.15 0.15" castshadow="true"/>
+    <light name="fill" pos="0.10 0.60 1.00" dir="0.20 -0.45 -1" directional="true"
+           diffuse="0.22 0.22 0.22" castshadow="false"/>
+
+    <!-- Frame convention: the robot base is at the origin with +x pointing
+         forward across the table and +z up.  The tabletop surface is z = 0,
+         flush with the base, and the arm stands at the rear edge. -->
+    <geom name="tabletop" class="furniture" type="box" pos="0.40 0 -0.02"
+          size="0.45 0.42 0.02" material="table_material"/>
+    <geom name="floor" class="furniture" type="plane" pos="0.40 0 -0.72"
+          size="3 3 0.1" material="floor_material"/>
+
+    <body name="table_frame" pos="0.40 0 0" childclass="decor">
+      <geom type="box" pos="-0.42 -0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+      <geom type="box" pos="-0.42 0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+      <geom type="box" pos="0.42 -0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+      <geom type="box" pos="0.42 0.39 -0.37" size="0.025 0.025 0.35" material="frame_material"/>
+    </body>
+
+    <!-- Plain backdrop behind the arm so the observation cameras see objects
+         against a uniform background instead of the skybox gradient. -->
+    <geom name="backdrop" class="decor" type="box" pos="-0.08 0 0.09"
+          size="0.012 0.50 0.32" material="backdrop_material"/>
+
+    <!-- Policy global camera: a true top-down view.  Camera +Y (image up) is
+         aligned with world +X, so the arm base at x=0 is centred near the
+         bottom of the image and the forward work area fills the space above
+         it.  The wrist camera is attached dynamically in mj_env/scene.py. -->
+    <camera name="global_camera" pos="0.17 0 0.66"
+            xyaxes="0 -1 0 1 0 0" fovy="46"/>
+    <!-- Legacy alias; mj_env exposes this view as global_camera. -->
+    <camera name="overhead_camera" pos="0.17 0 0.66" xyaxes="0 -1 0 1 0 0" fovy="46"/>
+  </worldbody>
+</mujoco>
