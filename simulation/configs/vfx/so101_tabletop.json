@@ -1,0 +1,1152 @@
+{
+  "scene": "p1_place_disc",
+  "image_size": 224,
+  "seed": 0,
+  "ladder": [
+    "v0_clean",
+    "v1_light",
+    "v2_medium",
+    "v3_heavy"
+  ],
+  "calibration": "visibility chosen by matching the object-vs-background signal of global_camera to the targets {\"v1_light\": 0.7, \"v2_medium\": 0.45, \"v3_heavy\": 0.25}",
+  "targets": {
+    "v1_light": 0.7,
+    "v2_medium": 0.45,
+    "v3_heavy": 0.25
+  },
+  "rungs": {
+    "v0_clean": {
+      "mode": "clean",
+      "measured": {
+        "global_camera": {
+          "signal_object_vs_background": -124.82006304075665,
+          "rms_contrast": 0.23563381489280344,
+          "rms_contrast_object": 0.33354197206736325,
+          "background_edge_energy": 58.782328415477295,
+          "object_edge_energy": 171.460907831639
+        },
+        "wrist_camera": {
+          "signal_object_vs_background": -124.58300167045498,
+          "rms_contrast": 0.41109118560480834,
+          "rms_contrast_object": 0.4834572732930517,
+          "background_edge_energy": 81.26007969999068,
+          "object_edge_energy": 44.976008426944176
+        }
+      }
+    },
+    "v1_light": {
+      "mode": "water",
+      "visibility_m": 3.0,
+      "hash": "09aba1aa7129",
+      "params": {
+        "name": "visibility3m",
+        "beta": [
+          1.0,
+          0.35,
+          0.25
+        ],
+        "beta_scatter": null,
+        "ambient": [
+          0.05,
+          0.2,
+          0.24
+        ],
+        "depth_default": 1.5,
+        "depth_min": 0.15,
+        "depth_max": 12.0,
+        "depth_scale": 1.0,
+        "radial_depth": true,
+        "scatter_sigma": 0.7999999999999999,
+        "scatter_dist": 3.0,
+        "exposure": 1.0,
+        "gamma": 1.0,
+        "wb_gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "vignette": 0.15,
+        "noise_sigma": 4.0,
+        "shot_noise": 0.05,
+        "jpeg_quality": 0,
+        "particle_density": 0.39999999999999997,
+        "particle_brightness": 0.3,
+        "_visibility_m": 3.0
+      },
+      "measured": {
+        "global_camera": {
+          "visibility_m": 3.0,
+          "hash": "09aba1aa7129",
+          "signal_object_vs_background": -91.99141718134187,
+          "rms_contrast": 0.23131012363033973,
+          "rms_contrast_object": 0.3309633873270661,
+          "background_edge_energy": 72.95653934733838,
+          "object_edge_energy": 130.47307227958174,
+          "relative_signal": 0.7369922345841513
+        },
+        "wrist_camera": {
+          "visibility_m": 3.0,
+          "hash": "09aba1aa7129",
+          "signal_object_vs_background": -113.49156547133532,
+          "rms_contrast": 0.41272709117083595,
+          "rms_contrast_object": 0.4818543238273248,
+          "background_edge_energy": 97.76035555639977,
+          "object_edge_energy": 55.7578513758387,
+          "relative_signal": 0.9109715125626966
+        }
+      }
+    },
+    "v2_medium": {
+      "mode": "water",
+      "visibility_m": 1.2,
+      "hash": "7cfa623a8e7a",
+      "params": {
+        "name": "visibility1.2m",
+        "beta": [
+          2.5,
+          0.875,
+          0.625
+        ],
+        "beta_scatter": null,
+        "ambient": [
+          0.05,
+          0.2,
+          0.24
+        ],
+        "depth_default": 1.5,
+        "depth_min": 0.15,
+        "depth_max": 4.8,
+        "depth_scale": 1.0,
+        "radial_depth": true,
+        "scatter_sigma": 2.0,
+        "scatter_dist": 1.2,
+        "exposure": 1.0,
+        "gamma": 1.0,
+        "wb_gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "vignette": 0.15,
+        "noise_sigma": 10.0,
+        "shot_noise": 0.05,
+        "jpeg_quality": 0,
+        "particle_density": 0.55,
+        "particle_brightness": 0.3,
+        "_visibility_m": 1.2
+      },
+      "measured": {
+        "global_camera": {
+          "visibility_m": 1.2,
+          "hash": "7cfa623a8e7a",
+          "signal_object_vs_background": -60.88576975471784,
+          "rms_contrast": 0.22149090447736933,
+          "rms_contrast_object": 0.31998715395266913,
+          "background_edge_energy": 64.34706245315684,
+          "object_edge_energy": 89.24205342727346,
+          "relative_signal": 0.48778832722458426
+        },
+        "wrist_camera": {
+          "visibility_m": 1.2,
+          "hash": "7cfa623a8e7a",
+          "signal_object_vs_background": -103.00320457317235,
+          "rms_contrast": 0.40848809544756737,
+          "rms_contrast_object": 0.49028716915097414,
+          "background_edge_energy": 96.92797092656029,
+          "object_edge_energy": 68.17053072373042,
+          "relative_signal": 0.8267837762139881
+        }
+      }
+    },
+    "v3_heavy": {
+      "mode": "water",
+      "visibility_m": 0.6,
+      "hash": "4be3ae1cec37",
+      "params": {
+        "name": "visibility0.6m",
+        "beta": [
+          5.0,
+          1.75,
+          1.25
+        ],
+        "beta_scatter": null,
+        "ambient": [
+          0.05,
+          0.2,
+          0.24
+        ],
+        "depth_default": 1.5,
+        "depth_min": 0.15,
+        "depth_max": 2.4,
+        "depth_scale": 1.0,
+        "radial_depth": true,
+        "scatter_sigma": 4.0,
+        "scatter_dist": 1.0,
+        "exposure": 1.0,
+        "gamma": 1.0,
+        "wb_gain": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "vignette": 0.15,
+        "noise_sigma": 10.0,
+        "shot_noise": 0.05,
+        "jpeg_quality": 0,
+        "particle_density": 0.55,
+        "particle_brightness": 0.3,
+        "_visibility_m": 0.6
+      },
+      "measured": {
+        "global_camera": {
+          "visibility_m": 0.6,
+          "hash": "4be3ae1cec37",
+          "signal_object_vs_background": -27.187854342282193,
+          "rms_contrast": 0.2019235304870564,
+          "rms_contrast_object": 0.2260723307842052,
+          "background_edge_energy": 45.95439348800494,
+          "object_edge_energy": 52.195101251794,
+          "relative_signal": 0.217816380475667
+        },
+        "wrist_camera": {
+          "visibility_m": 0.6,
+          "hash": "4be3ae1cec37",
+          "signal_object_vs_background": -87.09115797715799,
+          "rms_contrast": 0.39719734629582826,
+          "rms_contrast_object": 0.45191949987625385,
+          "background_edge_energy": 84.6355403153182,
+          "object_edge_energy": 59.20616874187116,
+          "relative_signal": 0.6990613230489515
+        }
+      }
+    }
+  },
+  "cameras": {
+    "global_camera": {
+      "arm_pose": "home",
+      "mask_pixels": 364,
+      "clean": {
+        "signal_object_vs_background": -124.82006304075665,
+        "rms_contrast": 0.23563381489280344,
+        "rms_contrast_object": 0.33354197206736325,
+        "background_edge_energy": 58.782328415477295,
+        "object_edge_energy": 171.460907831639
+      },
+      "sweep": {
+        "v_5.0": {
+          "visibility_m": 5.0,
+          "hash": "2266802fea16",
+          "params": {
+            "name": "visibility5m",
+            "beta": [
+              0.6,
+              0.21,
+              0.15
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 20.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 0.48,
+            "scatter_dist": 5.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 2.4,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.24,
+            "particle_brightness": 0.3,
+            "_visibility_m": 5.0
+          },
+          "signal_object_vs_background": -102.97569905411045,
+          "rms_contrast": 0.23609189826280033,
+          "rms_contrast_object": 0.3362463690611991,
+          "background_edge_energy": 76.50517000934575,
+          "object_edge_energy": 149.38392001447733,
+          "relative_signal": 0.8249931665271351
+        },
+        "v_3.0": {
+          "visibility_m": 3.0,
+          "hash": "09aba1aa7129",
+          "params": {
+            "name": "visibility3m",
+            "beta": [
+              1.0,
+              0.35,
+              0.25
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 12.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 0.7999999999999999,
+            "scatter_dist": 3.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 4.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.39999999999999997,
+            "particle_brightness": 0.3,
+            "_visibility_m": 3.0
+          },
+          "signal_object_vs_background": -91.99141718134187,
+          "rms_contrast": 0.23131012363033973,
+          "rms_contrast_object": 0.3309633873270661,
+          "background_edge_energy": 72.95653934733838,
+          "object_edge_energy": 130.47307227958174,
+          "relative_signal": 0.7369922345841513
+        },
+        "v_2.0": {
+          "visibility_m": 2.0,
+          "hash": "4f8780ce8bcd",
+          "params": {
+            "name": "visibility2m",
+            "beta": [
+              1.5,
+              0.5249999999999999,
+              0.375
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 8.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 1.2,
+            "scatter_dist": 2.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 6.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 2.0
+          },
+          "signal_object_vs_background": -79.77856425093893,
+          "rms_contrast": 0.22533020100609474,
+          "rms_contrast_object": 0.3297796214579469,
+          "background_edge_energy": 71.12285329507465,
+          "object_edge_energy": 112.72299472384839,
+          "relative_signal": 0.6391485656027058
+        },
+        "v_1.5": {
+          "visibility_m": 1.5,
+          "hash": "a388ceb9a3c6",
+          "params": {
+            "name": "visibility1.5m",
+            "beta": [
+              2.0,
+              0.7,
+              0.5
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 6.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 1.5999999999999999,
+            "scatter_dist": 1.5,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 8.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 1.5
+          },
+          "signal_object_vs_background": -68.29683924977975,
+          "rms_contrast": 0.22251171802073547,
+          "rms_contrast_object": 0.3042790630814794,
+          "background_edge_energy": 62.982354366131254,
+          "object_edge_energy": 97.03386592419372,
+          "relative_signal": 0.5471623518366534
+        },
+        "v_1.2": {
+          "visibility_m": 1.2,
+          "hash": "7cfa623a8e7a",
+          "params": {
+            "name": "visibility1.2m",
+            "beta": [
+              2.5,
+              0.875,
+              0.625
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 4.8,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 2.0,
+            "scatter_dist": 1.2,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 1.2
+          },
+          "signal_object_vs_background": -60.88576975471784,
+          "rms_contrast": 0.22149090447736933,
+          "rms_contrast_object": 0.31998715395266913,
+          "background_edge_energy": 64.34706245315684,
+          "object_edge_energy": 89.24205342727346,
+          "relative_signal": 0.48778832722458426
+        },
+        "v_1.0": {
+          "visibility_m": 1.0,
+          "hash": "db999b8fe59b",
+          "params": {
+            "name": "visibility1m",
+            "beta": [
+              3.0,
+              1.0499999999999998,
+              0.75
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 4.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 2.4,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 1.0
+          },
+          "signal_object_vs_background": -47.535246144572724,
+          "rms_contrast": 0.21053386158021137,
+          "rms_contrast_object": 0.2707627781359767,
+          "background_edge_energy": 60.67040784030452,
+          "object_edge_energy": 68.04105725846728,
+          "relative_signal": 0.3808301725424651
+        },
+        "v_0.8": {
+          "visibility_m": 0.8,
+          "hash": "c8fc21077412",
+          "params": {
+            "name": "visibility0.8m",
+            "beta": [
+              3.75,
+              1.3125,
+              0.9375
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 3.2,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 2.9999999999999996,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.8
+          },
+          "signal_object_vs_background": -40.40829323271664,
+          "rms_contrast": 0.20677092167421096,
+          "rms_contrast_object": 0.2550073157545092,
+          "background_edge_energy": 51.918233262735555,
+          "object_edge_energy": 64.35027273374462,
+          "relative_signal": 0.3237323571894239
+        },
+        "v_0.6": {
+          "visibility_m": 0.6,
+          "hash": "4be3ae1cec37",
+          "params": {
+            "name": "visibility0.6m",
+            "beta": [
+              5.0,
+              1.75,
+              1.25
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 2.4,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 4.0,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.6
+          },
+          "signal_object_vs_background": -27.187854342282193,
+          "rms_contrast": 0.2019235304870564,
+          "rms_contrast_object": 0.2260723307842052,
+          "background_edge_energy": 45.95439348800494,
+          "object_edge_energy": 52.195101251794,
+          "relative_signal": 0.217816380475667
+        },
+        "v_0.45": {
+          "visibility_m": 0.45,
+          "hash": "0c9880201be2",
+          "params": {
+            "name": "visibility0.45m",
+            "beta": [
+              6.666666666666666,
+              2.333333333333333,
+              1.6666666666666665
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 1.8,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 4.0,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.45
+          },
+          "signal_object_vs_background": -17.472210179904494,
+          "rms_contrast": 0.1992472353341075,
+          "rms_contrast_object": 0.20429107688250897,
+          "background_edge_energy": 42.832833158275925,
+          "object_edge_energy": 45.831428337417364,
+          "relative_signal": 0.13997918086453306
+        },
+        "v_0.3": {
+          "visibility_m": 0.3,
+          "hash": "e2e11975ffef",
+          "params": {
+            "name": "visibility0.3m",
+            "beta": [
+              10.0,
+              3.5,
+              2.5
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 1.2,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 4.0,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.3
+          },
+          "signal_object_vs_background": -6.280446812259463,
+          "rms_contrast": 0.20230252645187732,
+          "rms_contrast_object": 0.2556723229638021,
+          "background_edge_energy": 41.032511472675566,
+          "object_edge_energy": 47.78044319817001,
+          "relative_signal": 0.05031600416840641
+        }
+      }
+    },
+    "wrist_camera": {
+      "arm_pose": "grasp",
+      "mask_pixels": 5226,
+      "clean": {
+        "signal_object_vs_background": -124.58300167045498,
+        "rms_contrast": 0.41109118560480834,
+        "rms_contrast_object": 0.4834572732930517,
+        "background_edge_energy": 81.26007969999068,
+        "object_edge_energy": 44.976008426944176
+      },
+      "sweep": {
+        "v_5.0": {
+          "visibility_m": 5.0,
+          "hash": "2266802fea16",
+          "params": {
+            "name": "visibility5m",
+            "beta": [
+              0.6,
+              0.21,
+              0.15
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 20.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 0.48,
+            "scatter_dist": 5.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 2.4,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.24,
+            "particle_brightness": 0.3,
+            "_visibility_m": 5.0
+          },
+          "signal_object_vs_background": -117.17741001017538,
+          "rms_contrast": 0.4146801021032007,
+          "rms_contrast_object": 0.4804274597833565,
+          "background_edge_energy": 99.45117260605763,
+          "object_edge_energy": 54.34501940553523,
+          "relative_signal": 0.9405569655492106
+        },
+        "v_3.0": {
+          "visibility_m": 3.0,
+          "hash": "09aba1aa7129",
+          "params": {
+            "name": "visibility3m",
+            "beta": [
+              1.0,
+              0.35,
+              0.25
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 12.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 0.7999999999999999,
+            "scatter_dist": 3.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 4.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.39999999999999997,
+            "particle_brightness": 0.3,
+            "_visibility_m": 3.0
+          },
+          "signal_object_vs_background": -113.49156547133532,
+          "rms_contrast": 0.41272709117083595,
+          "rms_contrast_object": 0.4818543238273248,
+          "background_edge_energy": 97.76035555639977,
+          "object_edge_energy": 55.7578513758387,
+          "relative_signal": 0.9109715125626966
+        },
+        "v_2.0": {
+          "visibility_m": 2.0,
+          "hash": "4f8780ce8bcd",
+          "params": {
+            "name": "visibility2m",
+            "beta": [
+              1.5,
+              0.5249999999999999,
+              0.375
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 8.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 1.2,
+            "scatter_dist": 2.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 6.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 2.0
+          },
+          "signal_object_vs_background": -110.50208671794326,
+          "rms_contrast": 0.41225947949738156,
+          "rms_contrast_object": 0.4811219146533325,
+          "background_edge_energy": 98.44927213605068,
+          "object_edge_energy": 58.54723635123588,
+          "relative_signal": 0.886975632600679
+        },
+        "v_1.5": {
+          "visibility_m": 1.5,
+          "hash": "a388ceb9a3c6",
+          "params": {
+            "name": "visibility1.5m",
+            "beta": [
+              2.0,
+              0.7,
+              0.5
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 6.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 1.5999999999999999,
+            "scatter_dist": 1.5,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 8.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 1.5
+          },
+          "signal_object_vs_background": -107.90543082451225,
+          "rms_contrast": 0.4113022720514644,
+          "rms_contrast_object": 0.4939875317789342,
+          "background_edge_energy": 99.2323862171746,
+          "object_edge_energy": 62.15312883444992,
+          "relative_signal": 0.8661328542230988
+        },
+        "v_1.2": {
+          "visibility_m": 1.2,
+          "hash": "7cfa623a8e7a",
+          "params": {
+            "name": "visibility1.2m",
+            "beta": [
+              2.5,
+              0.875,
+              0.625
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 4.8,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 2.0,
+            "scatter_dist": 1.2,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 1.2
+          },
+          "signal_object_vs_background": -103.00320457317235,
+          "rms_contrast": 0.40848809544756737,
+          "rms_contrast_object": 0.49028716915097414,
+          "background_edge_energy": 96.92797092656029,
+          "object_edge_energy": 68.17053072373042,
+          "relative_signal": 0.8267837762139881
+        },
+        "v_1.0": {
+          "visibility_m": 1.0,
+          "hash": "db999b8fe59b",
+          "params": {
+            "name": "visibility1m",
+            "beta": [
+              3.0,
+              1.0499999999999998,
+              0.75
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 4.0,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 2.4,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 1.0
+          },
+          "signal_object_vs_background": -99.14462053441417,
+          "rms_contrast": 0.40610522078914707,
+          "rms_contrast_object": 0.48481308673126117,
+          "background_edge_energy": 91.72150211275003,
+          "object_edge_energy": 64.54102793945565,
+          "relative_signal": 0.7958117817442703
+        },
+        "v_0.8": {
+          "visibility_m": 0.8,
+          "hash": "c8fc21077412",
+          "params": {
+            "name": "visibility0.8m",
+            "beta": [
+              3.75,
+              1.3125,
+              0.9375
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 3.2,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 2.9999999999999996,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.8
+          },
+          "signal_object_vs_background": -95.4657585836641,
+          "rms_contrast": 0.40384721474254603,
+          "rms_contrast_object": 0.4794837634199538,
+          "background_edge_energy": 91.44399433093467,
+          "object_edge_energy": 61.22901023411952,
+          "relative_signal": 0.7662823764367842
+        },
+        "v_0.6": {
+          "visibility_m": 0.6,
+          "hash": "4be3ae1cec37",
+          "params": {
+            "name": "visibility0.6m",
+            "beta": [
+              5.0,
+              1.75,
+              1.25
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 2.4,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 4.0,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.6
+          },
+          "signal_object_vs_background": -87.09115797715799,
+          "rms_contrast": 0.39719734629582826,
+          "rms_contrast_object": 0.45191949987625385,
+          "background_edge_energy": 84.6355403153182,
+          "object_edge_energy": 59.20616874187116,
+          "relative_signal": 0.6990613230489515
+        },
+        "v_0.45": {
+          "visibility_m": 0.45,
+          "hash": "0c9880201be2",
+          "params": {
+            "name": "visibility0.45m",
+            "beta": [
+              6.666666666666666,
+              2.333333333333333,
+              1.6666666666666665
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 1.8,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 4.0,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.45
+          },
+          "signal_object_vs_background": -79.31993852054443,
+          "rms_contrast": 0.3903042892596087,
+          "rms_contrast_object": 0.4434426658453376,
+          "background_edge_energy": 80.162930816585,
+          "object_edge_energy": 58.15844513510733,
+          "relative_signal": 0.6366834757309854
+        },
+        "v_0.3": {
+          "visibility_m": 0.3,
+          "hash": "e2e11975ffef",
+          "params": {
+            "name": "visibility0.3m",
+            "beta": [
+              10.0,
+              3.5,
+              2.5
+            ],
+            "beta_scatter": null,
+            "ambient": [
+              0.05,
+              0.2,
+              0.24
+            ],
+            "depth_default": 1.5,
+            "depth_min": 0.15,
+            "depth_max": 1.2,
+            "depth_scale": 1.0,
+            "radial_depth": true,
+            "scatter_sigma": 4.0,
+            "scatter_dist": 1.0,
+            "exposure": 1.0,
+            "gamma": 1.0,
+            "wb_gain": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "vignette": 0.15,
+            "noise_sigma": 10.0,
+            "shot_noise": 0.05,
+            "jpeg_quality": 0,
+            "particle_density": 0.55,
+            "particle_brightness": 0.3,
+            "_visibility_m": 0.3
+          },
+          "signal_object_vs_background": -65.37059720320048,
+          "rms_contrast": 0.3729841571912168,
+          "rms_contrast_object": 0.39687551613214944,
+          "background_edge_energy": 69.10559437683324,
+          "object_edge_energy": 52.89634480973216,
+          "relative_signal": 0.5247152205893848
+        }
+      }
+    }
+  }
+}

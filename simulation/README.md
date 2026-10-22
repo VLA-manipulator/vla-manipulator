@@ -96,7 +96,7 @@ uv run python -m mj_env.scripts.collect_demonstrations `
 ## 测试
 
 ```powershell
-uv run python -m unittest mj_env.test_gripper mj_env.test_criteria mj_env.test_demonstrations
+uv run python -m unittest mj_env.test_gripper mj_env.test_criteria mj_env.test_vfx mj_env.test_demonstrations
 ```
 
 无显示器的 Linux 服务器如需离屏渲染，可设置 `MUJOCO_GL=egl`。

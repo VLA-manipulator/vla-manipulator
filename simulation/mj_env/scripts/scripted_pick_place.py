@@ -40,6 +40,7 @@ from mj_env.env import HOME_QPOS
 from mj_env.specs import LEVEL_ORDER, get
 from mj_env.specs.criteria import RELEASE_MARGIN
 from mj_env.task_env import TaskEnv
+from mj_env.vfx import CLEAN_RUNG, LADDER
 
 from .scripted_pick import (
     JAW_CLEARANCE,
@@ -610,6 +611,8 @@ def run_pick_place(
         "height_above_rest_mm": float(info.get("height_above_rest", 0.0) * 1000.0),
         "grasp_opening_mm": float(info.get("grasp_opening", 0.0) * 1000.0),
         "spec_hash": env.spec_hash(),
+        "vfx_rung": env.vfx_rung,
+        "vfx_hash": env.vfx_hash,
         "static_penetration_mm": penetration["min"] * 1000.0,
     }
 
@@ -714,6 +717,12 @@ def main() -> int:
     )
     parser.add_argument("--headless", action="store_true")
     parser.add_argument(
+        "--vfx",
+        default=CLEAN_RUNG,
+        choices=LADDER,
+        help="imaging rung: v0_clean (default) or a calibrated water rung",
+    )
+    parser.add_argument(
         "--fixed-arm",
         action="store_true",
         help="keep the arm at HOME_QPOS instead of randomizing its initial pose",
@@ -732,6 +741,7 @@ def main() -> int:
         render_mode=None if args.headless else "human",
         instruction=args.instruction,
         instruction_pool=args.instruction_pool,
+        vfx=args.vfx,
         max_episode_steps=10_000,
     )
     solver = GraspSolver(env.model)
@@ -739,6 +749,7 @@ def main() -> int:
         f"  jaw        : {solver.calibration.min_opening * 1000:.1f}"
         f"-{solver.calibration.max_opening * 1000:.1f} mm"
     )
+    print(f"  imaging    : {args.vfx}" + (f"  hash={env.vfx_hash[:12]}" if env.vfx_hash else ""))
 
     outcomes: list[str] = []
     successes = 0

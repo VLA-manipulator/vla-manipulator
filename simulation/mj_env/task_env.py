@@ -32,6 +32,7 @@ from . import gripper, objects
 from .env import HOME_QPOS, SO101TabletopEnv
 from .scene import SCENES_DIR, TABLE_HEIGHT
 from .specs import TaskSpec, get
+from .vfx import CLEAN_RUNG, Imaging, get_rung
 
 __all__ = ["TaskEnv"]
 
@@ -48,6 +49,8 @@ class TaskEnv(SO101TabletopEnv):
         *,
         instruction: str | None = None,
         instruction_pool: str = "train",
+        vfx: str = CLEAN_RUNG,
+        vfx_seed: int | None = None,
         render_mode: str | None = None,
         image_size: tuple[int, int] = (224, 224),
         max_episode_steps: int = 600,
@@ -56,6 +59,13 @@ class TaskEnv(SO101TabletopEnv):
         spec = get(task_id)
         self.spec: TaskSpec = spec
         self.instruction_pool = instruction_pool
+        #: Imaging rung.  ``v0_clean`` keeps the parent's renderer untouched;
+        #: anything else routes every camera through the water model.  Every
+        #: level is collected in both conditions with the same seed, so this is
+        #: the switch that makes a clean/underwater pair a pair.
+        self.vfx_rung = vfx
+        self._imaging: Imaging | None = None
+        self._vfx_seed = vfx_seed
         super().__init__(
             scene_xml=Path(SCENES_DIR) / spec.scene,
             prop_bodies=spec.prop_bodies,
@@ -306,6 +316,53 @@ class TaskEnv(SO101TabletopEnv):
     def spec_hash(self) -> str:
         return self.spec.hash()
 
+    @property
+    def vfx_hash(self) -> str:
+        """Imaging fingerprint: empty for the clean rung, the water hash otherwise.
+
+        Written into every episode record next to ``layout_seed``.  A valid
+        clean/underwater pair has the same layout seed and *different* hashes;
+        two episodes with the same hash are two copies, not a comparison.
+        """
+        if self.vfx_rung == CLEAN_RUNG:
+            return ""
+        if self._imaging is None:
+            return get_rung(self.vfx_rung).hash
+        return self._imaging.params_hash
+
+    # -- rendering -----------------------------------------------------------
+
+    def render_camera(
+        self, camera: str, *, height: int | None = None, width: int | None = None
+    ) -> np.ndarray:
+        """Render one camera, through the water model when a water rung is set.
+
+        The clean rung delegates straight to the parent, so the legacy path and
+        every clean episode are pixel-identical to what the 320-episode dataset
+        was collected with.
+        """
+        if self.vfx_rung == CLEAN_RUNG:
+            return super().render_camera(camera, height=height, width=width)
+        height = self.image_height if height is None else height
+        width = self.image_width if width is None else width
+        if (
+            self._imaging is None
+            or self._imaging.height != height
+            or self._imaging.width != width
+        ):
+            if self._imaging is not None:
+                self._imaging.close()
+            self._imaging = Imaging(
+                self.model, width, height, self.vfx_rung, seed=self._vfx_seed
+            )
+        return self._imaging.render(self.data, camera)
+
+    def close(self) -> None:
+        if self._imaging is not None:
+            self._imaging.close()
+            self._imaging = None
+        super().close()
+
     def static_footprints(self) -> dict[str, objects.Footprint]:
         """Measured footprints of the static props, for tests against the sampler."""
         return {
@@ -335,6 +392,8 @@ class TaskEnv(SO101TabletopEnv):
                 "family": self.spec.family,
                 "level": self.spec.level,
                 "spec_hash": self.spec_hash(),
+                "vfx_rung": self.vfx_rung,
+                "vfx_hash": self.vfx_hash,
                 "instruction": self.instruction,
                 "instruction_kind": self.instruction_kind,
                 "layout": self.layout,
