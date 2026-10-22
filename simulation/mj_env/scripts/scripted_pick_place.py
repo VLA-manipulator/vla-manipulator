@@ -652,6 +652,12 @@ def run_cover_then_place(
     body the layout places away from both the target and the goal -- park it on
     the carry path and the second stage collides with its own debris.
     """
+    # Resolve the parking spot from this episode's sampled layout, not from
+    # the XML/default pose or the previous episode's layout.
+    options = {}
+    if kwargs.get("instruction") is not None:
+        options["instruction"] = kwargs["instruction"]
+    env.reset(seed=seed, options=options)
     park_xy = env.static_xy("park_spot")
     first = run_pick_place(
         env,
@@ -659,6 +665,7 @@ def run_cover_then_place(
         seed=seed,
         target=cover,
         place_xy=park_xy,
+        reset=False,
         on_frame=on_frame,
         **kwargs,
     )
@@ -667,7 +674,8 @@ def run_cover_then_place(
     # cover stage cannot satisfy by construction.  Using it here failed every
     # episode even when the cover landed 4.6 mm from its parking spot.
     cover_ok = (
-        float(first["goal_error_mm"]) <= 30.0
+        "goal_error_mm" in first
+        and float(first["goal_error_mm"]) <= 30.0
         and abs(float(first["height_above_rest_mm"])) <= 3.0
         and float(first["grasp_opening_mm"])
         >= (env.grip_width(cover) + RELEASE_MARGIN) * 1000.0
