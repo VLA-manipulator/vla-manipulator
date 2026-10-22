@@ -22,13 +22,23 @@ import mujoco
 import numpy as np
 from scipy.spatial import cKDTree
 
-from .scene import FIXED_FINGER_GEOM, MOVING_FINGER_GEOM, TCP_SITE
+from .scene import (
+    FIXED_PAD_GEOM,
+    MOVING_PAD_GEOM,
+    PAD_DEPTH,
+    PAD_MIN_HINGE_RADIUS,
+    PAD_WIDTH,
+    TCP_SITE,
+)
 
 #: Vertices closer to the hinge than this are structure, not pad; including
 #: them would report the hinge gap instead of the jaw opening.
-_PAD_MIN_HINGE_RADIUS = 0.05
+_PAD_MIN_HINGE_RADIUS = PAD_MIN_HINGE_RADIUS
 #: Number of closest pad vertex pairs averaged into the aperture centre.
 _PAD_SAMPLE = 150
+#: Grid resolution across each pad face; the pads are flat plates, so the
+#: closest points between two coarse grids already give the plane separation.
+_PAD_GRID = 5
 
 
 @dataclass(frozen=True)
@@ -65,7 +75,7 @@ class JawCalibration:
 
 
 def calibrate(model: mujoco.MjModel, *, samples: int = 25) -> JawCalibration:
-    """Sweep the jaw and measure its pad geometry against the finger meshes."""
+    """Sweep the jaw and measure its pad geometry against the flat plates."""
     data = mujoco.MjData(model)
     joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "gripper")
     site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, TCP_SITE)
@@ -78,8 +88,8 @@ def calibrate(model: mujoco.MjModel, *, samples: int = 25) -> JawCalibration:
         data.qpos[qpos_adr] = angle
         mujoco.mj_forward(model, data)
 
-        fixed = _pad_vertices(model, data, FIXED_FINGER_GEOM, joint_id)
-        moving = _pad_vertices(model, data, MOVING_FINGER_GEOM, joint_id)
+        fixed = _pad_face_points(model, data, FIXED_PAD_GEOM)
+        moving = _pad_face_points(model, data, MOVING_PAD_GEOM)
         distances, indices = cKDTree(fixed).query(moving)
         closest = np.argsort(distances)[:_PAD_SAMPLE]
         centre = ((moving[closest] + fixed[indices[closest]]) / 2.0).mean(axis=0)
@@ -96,6 +106,24 @@ def calibrate(model: mujoco.MjModel, *, samples: int = 25) -> JawCalibration:
         openings=np.asarray(openings),
         offsets=np.asarray(offsets),
     )
+
+
+def _pad_face_points(
+    model: mujoco.MjModel, data: mujoco.MjData, geom_name: str
+) -> np.ndarray:
+    """World-frame points on a pad's gripping face (its local +z side)."""
+    geom_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, geom_name)
+    if geom_id < 0:
+        raise ValueError(f"scene has no pad geom named {geom_name!r}")
+    size = model.geom_size[geom_id]
+    us = np.linspace(-1.0, 1.0, _PAD_GRID)
+    grid = np.stack(np.meshgrid(us, us, indexing="ij"), axis=-1).reshape(-1, 2)
+    local = np.zeros((len(grid), 3))
+    local[:, 0] = grid[:, 0] * size[0]
+    local[:, 1] = grid[:, 1] * size[1]
+    local[:, 2] = size[2]
+    rotation = data.geom_xmat[geom_id].reshape(3, 3)
+    return local @ rotation.T + data.geom_xpos[geom_id]
 
 
 def _pad_vertices(

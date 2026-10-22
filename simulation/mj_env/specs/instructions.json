@@ -1,0 +1,108 @@
+{
+  "_comment": "Instruction template pools. `train` sentences are sampled into episodes; `holdout` sentences are NEVER collected -- they exist only for the unseen-instruction evaluation. Every collected episode records which pool it came from, so a hold-out sentence can always be filtered back out. Minimum 3 train + 1 holdout per level. Levels where the sentence *chooses the object* also list a `targets` map; load_instruction_targets() refuses to load a level whose sentences are not all mapped.",
+  "p1_place_disc": {
+    "train": [
+      "put the red cube on the blue disc",
+      "place the red cube on the blue disc",
+      "move the red cube onto the blue disc"
+    ],
+    "holdout": [
+      "set the red cube down on the blue disc"
+    ]
+  },
+  "o1_open_baseline": {
+    "train": [
+      "put the red cube on the blue disc",
+      "place the red cube on the blue disc",
+      "move the red cube onto the blue disc"
+    ],
+    "holdout": [
+      "set the red cube down on the blue disc"
+    ]
+  },
+  "o2_thin_bar": {
+    "train": [
+      "pick the orange bar up across its narrow side and put it on the blue disc",
+      "grab the orange bar by its long narrow face and place it on the blue disc",
+      "put the orange bar on the blue disc, holding it across the narrow side"
+    ],
+    "holdout": [
+      "get the orange bar onto the blue disc"
+    ]
+  },
+  "o4_narrow_slot": {
+    "train": [
+      "take the red cube out of the narrow slot and put it on the blue disc",
+      "reach between the two walls and place the red cube on the blue disc",
+      "pick the red cube up from between the walls and put it on the blue disc"
+    ],
+    "holdout": [
+      "get the red cube out of the gap and onto the blue disc"
+    ]
+  },
+  "p3_in_container": {
+    "train": [
+      "put the red cube into the grey container",
+      "place the red cube inside the container",
+      "drop the red cube into the box"
+    ],
+    "holdout": [
+      "get the red cube into the container"
+    ]
+  },
+  "p4_stack": {
+    "train": [
+      "stack the red cube on top of the yellow cube",
+      "put the red cube on top of the yellow cube",
+      "place the red cube onto the yellow cube"
+    ],
+    "holdout": [
+      "set the red cube down on the yellow one"
+    ]
+  },
+  "_p2_comment": "P2 is the language-referenced level: two same-sized cubes are present and the sentence says which one. `targets` maps every sentence to the body it names; an unmapped sentence would make the language ablation silently meaningless.",
+  "p2_language_ref": {
+    "train": [
+      "put the red cube on the blue disc",
+      "move the red cube onto the blue disc",
+      "place the red cube on the blue disc",
+      "put the yellow cube on the blue disc",
+      "move the yellow cube onto the blue disc",
+      "place the yellow cube on the blue disc"
+    ],
+    "holdout": [
+      "set the red cube down on the blue disc",
+      "take the yellow cube and set it down on the blue disc"
+    ],
+    "targets": {
+      "put the red cube on the blue disc": "object",
+      "move the red cube onto the blue disc": "object",
+      "place the red cube on the blue disc": "object",
+      "set the red cube down on the blue disc": "object",
+      "put the yellow cube on the blue disc": "object2",
+      "move the yellow cube onto the blue disc": "object2",
+      "place the yellow cube on the blue disc": "object2",
+      "take the yellow cube and set it down on the blue disc": "object2"
+    }
+  },
+  "o5_covered_stack": {
+    "train": [
+      "move the grey cube off the red cube and put the red cube on the blue disc",
+      "clear the grey cube out of the way, then put the red cube on the blue disc",
+      "take the grey cube off the top, then place the red cube on the blue disc"
+    ],
+    "holdout": [
+      "get the red cube out from under the grey cube and onto the blue disc"
+    ]
+  },
+  "o3_wrist_occlusion": {
+    "train": [
+      "put the red cube on the blue disc, reaching past the grey wall",
+      "place the red cube on the blue disc from behind the grey wall",
+      "put the red cube on the blue disc even though the wall is in the way"
+    ],
+    "holdout": [
+      "get the red cube onto the blue disc past the wall"
+    ]
+  }
+}
