@@ -44,6 +44,10 @@ def main() -> int:
     parser.add_argument("--quota", type=_quota, action="append", required=True)
     parser.add_argument("--max-attempts-factor", type=int, default=3)
     parser.add_argument("--seed", type=int, default=10000)
+    parser.add_argument(
+        "--fixed-instructions", action="store_true",
+        help="use one canonical train sentence per new task; P2 alternates red/yellow",
+    )
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--height", type=int, default=224)
     parser.add_argument("--width", type=int, default=224)
@@ -94,7 +98,17 @@ def main() -> int:
                 if target_saved >= quota:
                     break
                 seed = args.seed + offset
-                task_text = objects.BY_NAME[task_id].prompt if legacy else ""
+                if legacy:
+                    task_text = objects.BY_NAME[task_id].prompt
+                elif args.fixed_instructions and task_id == "p2_language_ref":
+                    task_text = (
+                        "put the red cube on the blue disc"
+                        if target_saved % 2 == 0 else "put the yellow cube on the blue disc"
+                    )
+                elif args.fixed_instructions:
+                    task_text = spec.instructions[0]
+                else:
+                    task_text = ""
                 recorder = SynchronizedEpisodeRecorder(
                     dataset=dataset, adapter=adapter, fps=fps, task=task_text
                 )
@@ -118,6 +132,7 @@ def main() -> int:
                     else:
                         result = expert_for(env)(
                             env, solver, seed=seed, on_frame=on_frame,
+                            instruction=task_text if args.fixed_instructions else None,
                         )
                     wrist_excess = recorder.wrist_roll_excess_degrees
                     wrist = np.asarray(recorder._wrist_roll_radians, dtype=float)
