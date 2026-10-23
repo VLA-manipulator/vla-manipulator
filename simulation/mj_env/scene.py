@@ -1,19 +1,19 @@
 """Compile the SO101 tabletop MuJoCo model.
 
 ``assets/scene.xml`` is a plain, viewer-openable MJCF that includes the
-calibrated robot from the ``so101`` package.  Three things this environment
-needs cannot be expressed there, because they belong to bodies owned by the
-included robot file and MJCF has no way to amend an included body:
+calibrated robot from the ``so101`` package.  The wrist camera and finger
+contact properties belong to bodies owned by the included robot file, so
+they are applied here after parsing the scene:
 
 * the wrist camera, which must hang off the ``gripper`` body;
-* flat gripping pads on the two jaws, measured from the meshes, because the
-  curved prongs collide only along a line at their tips and let an object sink
-  into the jaw;
-* high friction and stiff contacts on those pads, so a friction-driven grasp
-  does not slip and does not let the object sink either.
+* high friction on the original finger collision meshes.
 
-All three are applied here with ``mujoco.MjSpec`` after parsing, which keeps
+These are applied with ``mujoco.MjSpec`` after parsing, which keeps
 ``so101/assets/so101_new_calib.xml`` a pure hardware description.
+
+This mesh-contact variant is an experiment: the convex hulls can allow an
+object to sink into a jaw.  Do not treat higher grasp success as proof of
+better physical fidelity without measuring contact penetration.
 """
 
 from __future__ import annotations
@@ -280,12 +280,9 @@ def build_spec(scene_xml: str | Path | None = None) -> mujoco.MjSpec:
     )
     for geom, name in fingers:
         geom.name = name
-        # The flat pads below carry every finger contact.  Colliding the curved
-        # prong itself grips on a line and sinks the object into the jaw.
-        geom.contype = 0
-        geom.conaffinity = 0
-
-    _add_gripper_pads(spec)
+        geom.friction = list(_FINGER_FRICTION)
+        geom.condim = _FINGER_CONDIM
+        geom.priority = _FINGER_PRIORITY
 
     return spec
 

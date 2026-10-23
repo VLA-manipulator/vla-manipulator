@@ -15,10 +15,10 @@ from so101 import ARM_JOINT_NAMES, SO101
 from . import layout, objects
 from .glfw_viewer import GLFWViewer
 from .scene import (
-    FIXED_PAD_GEOM,
+    FIXED_FINGER_GEOM,
     GRASP_ZONE_HALF_ANGLE,
     GRASP_ZONE_RADIUS,
-    MOVING_PAD_GEOM,
+    MOVING_FINGER_GEOM,
     SCENE_CAMERA,
     TABLE_HEIGHT,
     TCP_SITE,
@@ -193,8 +193,8 @@ class SO101TabletopEnv(gym.Env):
 
         self._tcp_site_id = self._id(mujoco.mjtObj.mjOBJ_SITE, TCP_SITE)
         self._finger_geom_ids = (
-            self._id(mujoco.mjtObj.mjOBJ_GEOM, FIXED_PAD_GEOM),
-            self._id(mujoco.mjtObj.mjOBJ_GEOM, MOVING_PAD_GEOM),
+            self._id(mujoco.mjtObj.mjOBJ_GEOM, FIXED_FINGER_GEOM),
+            self._id(mujoco.mjtObj.mjOBJ_GEOM, MOVING_FINGER_GEOM),
         )
 
     def _id(self, obj_type: mujoco.mjtObj, name: str) -> int:

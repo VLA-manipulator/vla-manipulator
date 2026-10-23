@@ -48,20 +48,18 @@ from mj_env import gripper, objects
 from mj_env.env import HOME_QPOS, SO101TabletopEnv
 
 #: Extra jaw opening over the object's width while approaching, and how far
-#: past the object's width the jaw is commanded so the pads keep pressing.
-#: The squeeze is the servo error the contact needs in order to carry load, so
-#: it also sets how far the pads sink into the object: 4 mm holds every
-#: catalogue object while keeping the finger body clear of it.
+#: past the object's width the jaw is commanded so the fingers keep pressing.
+#: Restore the mesh-contact controller's original squeeze for this rollback.
 JAW_CLEARANCE = 0.022
-JAW_SQUEEZE = 0.004
+JAW_SQUEEZE = 0.006
 
-#: Half-gap left between each pad and the object while descending.  The fixed
+#: Half-gap left between each finger and the object while descending.  The fixed
 #: finger does not move when the jaw opens, so aiming the closed aperture at
-#: the object puts that pad flush against its side and the descent scrapes
+#: the object puts that finger flush against its side and the descent scrapes
 #: down it -- enough to tip a cube over before the jaw ever closes.  Aiming a
-#: slightly wider aperture instead centres the object between the pads with
+#: slightly wider aperture instead centres the object between the fingers with
 #: clearance on both sides.
-PAD_CLEARANCE = 0.006
+PAD_CLEARANCE = 0.004
 
 #: Elbow-up seed for the planar joints.  ``inverse_pose`` does no random
 #: restarts, so seeding shoulder_pan and wrist_roll near their analytic values
