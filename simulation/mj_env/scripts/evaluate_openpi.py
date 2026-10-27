@@ -17,6 +17,10 @@ def main() -> int:
     parser.add_argument("--host", default="localhost")
     parser.add_argument("--port", type=int, default=8000)
     parser.add_argument("--target", choices=objects.NAMES, default="cube_red")
+    parser.add_argument(
+        "--prompt",
+        help="override the trained task wording for a prompt-only evaluation",
+    )
     parser.add_argument("--seed", type=int, default=1000, help="use held-out seeds for evaluation")
     parser.add_argument("--episodes", type=int, default=10)
     parser.add_argument("--replan-steps", type=int, default=5)
@@ -52,7 +56,7 @@ def main() -> int:
                     "observation/image": observation["observation.image"],
                     "observation/wrist_image": observation["observation.wrist_image"],
                     "observation/state": adapter.to_lerobot(observation["observation.state"]),
-                    "prompt": env.task,
+                    "prompt": args.prompt if args.prompt is not None else env.task,
                 }
                 action_chunk = np.asarray(client.infer(request)["actions"], dtype=np.float32)
                 if action_chunk.ndim != 2 or action_chunk.shape[1] != 6:
