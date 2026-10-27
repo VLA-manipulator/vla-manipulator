@@ -483,8 +483,10 @@ def run_pick_place(
         "instruction": env.instruction,
         "instruction_kind": env.instruction_kind,
         "initial_target_position": initial_target_position,
+        "initial_grasp_yaw": grasp_axis_yaw(env, target),
         "goal_xy": goal_xy.tolist(),
         "initial_qpos": initial_q.tolist(),
+        "expert_target_motor_step": tuning.target_motor_step,
     }
 
     width = env._objects[target].grip_width
@@ -494,7 +496,7 @@ def run_pick_place(
 
     try:
         solutions = solve_pick_place(
-            solver, arm_for(env), grasp_aim, grasp_axis_yaw(env, target), place_aim, offset, tuning
+            solver, arm_for(env), grasp_aim, result["initial_grasp_yaw"], place_aim, offset, tuning
         )
     except (ValueError, FloatingPointError):
         solutions = None
@@ -516,11 +518,23 @@ def run_pick_place(
     )
     psi = float(solutions["psi"][0])
 
-    _glide(env, np.array([*solutions["hover"], jaw_open]), tuning.steps_hover, on_frame)
-    _glide(env, np.array([*solutions["reach"], jaw_approach]), tuning.steps_reach, on_frame)
-    _glide(env, np.array([*solutions["grasp"], jaw_approach]), tuning.steps_descend, on_frame)
+    _glide(
+        env, np.array([*solutions["hover"], jaw_open]),
+        tuning.steps_hover, on_frame, target_motor_step=tuning.target_motor_step,
+    )
+    _glide(
+        env, np.array([*solutions["reach"], jaw_approach]),
+        tuning.steps_reach, on_frame, target_motor_step=tuning.target_motor_step,
+    )
+    _glide(
+        env, np.array([*solutions["grasp"], jaw_approach]),
+        tuning.steps_descend, on_frame, target_motor_step=tuning.target_motor_step,
+    )
     _glide(env, np.array([*solutions["grasp"], jaw_shut]), tuning.steps_close, on_frame)
-    _glide(env, np.array([*solutions["lift"], jaw_shut]), tuning.steps_lift, on_frame)
+    _glide(
+        env, np.array([*solutions["lift"], jaw_shut]),
+        tuning.steps_lift, on_frame, target_motor_step=tuning.target_motor_step,
+    )
 
     # Carry along the cylindrical path: up, around at a safe radius, then down.
     #
@@ -652,8 +666,7 @@ def run_cover_then_place(
     body the layout places away from both the target and the goal -- park it on
     the carry path and the second stage collides with its own debris.
     """
-    # Resolve the parking spot from this episode's sampled layout, not from
-    # the XML/default pose or the previous episode's layout.
+    # Resolve the marker from this seed's sampled layout before the first pick.
     options = {}
     if kwargs.get("instruction") is not None:
         options["instruction"] = kwargs["instruction"]

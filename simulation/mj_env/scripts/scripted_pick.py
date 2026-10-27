@@ -149,12 +149,16 @@ class PickTuning:
     #: through the middle; raise it to grip nearer the top of a tall object.
     grasp_rise: float = 0.0
     lift_height: float = 0.14
-    steps_hover: int = 30
-    steps_reach: int = 20
-    steps_descend: int = 25
+    steps_hover: int = 20
+    steps_reach: int = 15
+    steps_descend: int = 18
     steps_close: int = 20
-    steps_lift: int = 25
+    steps_lift: int = 18
     steps_hold: int = 10
+    #: Target peak change in normalized motor units per 20 Hz control step.
+    #: Stage step counts above are safety minima; longer moves get more steps.
+    #: Jaw closure and Cartesian carrying keep their separate timing rules.
+    target_motor_step: float = 1.5
 
 
 def is_sphere(env: SO101TabletopEnv, name: str) -> bool:
@@ -352,9 +356,22 @@ def _glide(
     target: np.ndarray,
     steps: int,
     on_frame: FrameCallback | None = None,
+    *,
+    target_motor_step: float | None = None,
 ) -> dict:
     """Ramp to ``target``; callbacks pair the pre-action observation with its action."""
     start = env.data.ctrl[env._actuator_ids].copy()
+    if target_motor_step is not None:
+        if not np.isfinite(target_motor_step) or target_motor_step <= 0:
+            raise ValueError("target_motor_step must be positive and finite")
+        from mj_env.adapters import NORMALIZED_RANGES
+
+        normalized_span = np.asarray(
+            [high - low for low, high in NORMALIZED_RANGES[:5]], dtype=float
+        )
+        radian_span = np.asarray(env.action_space.high[:5] - env.action_space.low[:5])
+        motor_distance = np.abs(np.asarray(target[:5]) - start[:5]) / radian_span * normalized_span
+        steps = max(steps, int(np.ceil(float(np.max(motor_distance)) / target_motor_step)))
     info: dict = env._info() if on_frame is not None else {}
     observation = env._observation() if on_frame is not None else None
     for index in range(steps):
@@ -425,6 +442,8 @@ def run_episode(
             "target": target,
             "initial_target_position": initial_target_position,
             "initial_qpos": initial_q.tolist(),
+            "initial_grasp_yaw": heading,
+            "expert_target_motor_step": tuning.target_motor_step,
             "outcome": "ik_fail",
             "success": False,
         }
@@ -432,11 +451,11 @@ def run_episode(
     jaw_open = solver.calibration.angle_for(width + JAW_CLEARANCE)
     jaw_shut = solver.calibration.angle_for(max(width - JAW_SQUEEZE, 0.0))
 
-    _glide(env, np.array([*solutions["hover"], jaw_open]), tuning.steps_hover, on_frame)
-    _glide(env, np.array([*solutions["reach"], jaw_open]), tuning.steps_reach, on_frame)
-    _glide(env, np.array([*solutions["grasp"], jaw_open]), tuning.steps_descend, on_frame)
+    _glide(env, np.array([*solutions["hover"], jaw_open]), tuning.steps_hover, on_frame, target_motor_step=tuning.target_motor_step)
+    _glide(env, np.array([*solutions["reach"], jaw_open]), tuning.steps_reach, on_frame, target_motor_step=tuning.target_motor_step)
+    _glide(env, np.array([*solutions["grasp"], jaw_open]), tuning.steps_descend, on_frame, target_motor_step=tuning.target_motor_step)
     _glide(env, np.array([*solutions["grasp"], jaw_shut]), tuning.steps_close, on_frame)
-    _glide(env, np.array([*solutions["lift"], jaw_shut]), tuning.steps_lift, on_frame)
+    _glide(env, np.array([*solutions["lift"], jaw_shut]), tuning.steps_lift, on_frame, target_motor_step=tuning.target_motor_step)
     info = _glide(
         env,
         np.array([*solutions["lift"], jaw_shut]),
@@ -448,6 +467,8 @@ def run_episode(
         "target": target,
         "initial_target_position": initial_target_position,
         "initial_qpos": initial_q.tolist(),
+        "initial_grasp_yaw": heading,
+        "expert_target_motor_step": tuning.target_motor_step,
         "outcome": "success" if info["success"] else ("dropped" if info["grasped"] else "missed"),
         "success": bool(info["success"]),
         "grasped": bool(info["grasped"]),
@@ -471,6 +492,7 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=0, help="first layout seed")
     parser.add_argument("--grasp-rise", type=float, default=PickTuning.grasp_rise)
     parser.add_argument("--approach-height", type=float, default=PickTuning.approach_height)
+    parser.add_argument("--target-motor-step", type=float, default=PickTuning.target_motor_step)
     parser.add_argument(
         "--headless",
         action="store_true",
@@ -483,7 +505,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    tuning = PickTuning(grasp_rise=args.grasp_rise, approach_height=args.approach_height)
+    tuning = PickTuning(
+        grasp_rise=args.grasp_rise,
+        approach_height=args.approach_height,
+        target_motor_step=args.target_motor_step,
+    )
     targets = objects.NAMES if args.all else (args.object,)
 
     env = SO101TabletopEnv(

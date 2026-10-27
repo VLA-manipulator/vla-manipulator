@@ -177,6 +177,27 @@ def main() -> int:
                         f"progress={target_saved}/{quota}",
                         flush=True,
                     )
+                except RuntimeError as exc:
+                    dataset.clear_episode_buffer()
+                    if task_id != "o5_covered_stack" or str(exc) != (
+                        "could not find a parking spot for O5 in 500 tries"
+                    ):
+                        raise
+                    record = {
+                        "task_id": task_id,
+                        "seed": seed,
+                        "frames": 0,
+                        "instruction": task_text,
+                        "outcome": "invalid_layout",
+                        "success": False,
+                        "saved": False,
+                    }
+                    with (args.root / "collection_results.jsonl").open(
+                        "a", encoding="utf-8"
+                    ) as handle:
+                        handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+                    attempted += 1
+                    print(f"{task_id} seed={seed} invalid_layout saved=False", flush=True)
                 except Exception:
                     dataset.clear_episode_buffer()
                     raise

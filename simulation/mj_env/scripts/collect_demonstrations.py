@@ -45,6 +45,10 @@ def main() -> int:
         help="stop retrying each object after this many attempts",
     )
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--seed-plan", type=Path,
+        help="ordered successful seeds from plan_diverse_expert_seeds",
+    )
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--height", type=int, default=224)
     parser.add_argument("--width", type=int, default=224)
@@ -83,6 +87,9 @@ def main() -> int:
     adapter = LeRobotSO101Adapter(env)
     tuning = PickTuning()
     targets = objects.NAMES if args.all else (args.object,)
+    seed_plan = None
+    if args.seed_plan is not None:
+        seed_plan = json.loads(args.seed_plan.read_text(encoding="utf-8"))["tasks"]
     results_path = args.root / "collection_results.jsonl"
     saved = 0
     attempted = 0
@@ -91,11 +98,17 @@ def main() -> int:
         for target in targets:
             target_saved = 0
             target_attempted = 0
+            planned_seeds = (
+                [int(item["seed"]) for item in seed_plan[target]]
+                if seed_plan is not None else None
+            )
             attempt_limit = args.max_attempts_per_object or args.episodes
+            if planned_seeds is not None:
+                attempt_limit = min(attempt_limit, len(planned_seeds))
             for offset in range(attempt_limit):
                 if args.successes_per_object is not None and target_saved >= args.successes_per_object:
                     break
-                seed = args.seed + offset
+                seed = planned_seeds[offset] if planned_seeds is not None else args.seed + offset
                 task = objects.BY_NAME[target].prompt
                 recorder = SynchronizedEpisodeRecorder(
                     dataset=dataset,
