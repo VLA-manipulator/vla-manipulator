@@ -69,14 +69,11 @@ class RTCController:
         if timing is not None and math.isfinite(float(timing)):
             self._infer_times_ms.append(float(timing))
         actions = np.asarray(response["actions"], dtype=np.float32)
-        model = np.asarray(response["rtc_model_actions"], dtype=np.float32)
         if actions.shape != (self.horizon, self.action_dim):
             raise ValueError(f"invalid RTC actions shape {actions.shape}")
-        if model.ndim != 2 or model.shape[0] != self.horizon:
-            raise ValueError(f"invalid RTC model actions shape {model.shape}")
-        if not np.isfinite(actions).all() or not np.isfinite(model).all():
+        if not np.isfinite(actions).all():
             raise ValueError("RTC policy returned non-finite actions")
-        return {"actions": actions, "model": model}
+        return {"actions": actions}
 
     def get_action(self, observation: dict) -> np.ndarray:
         if self._current is None:
@@ -100,12 +97,11 @@ class RTCController:
             if delay > overlap:
                 self._deadline_misses += 1
                 raise RTCDeadlineMissed(f"forecast delay {delay} exceeds overlap {overlap}")
-            model = self._current["model"]
-            previous = np.zeros_like(model)
-            previous[:overlap] = model[index:]
+            previous = np.zeros_like(self._current["actions"])
+            previous[:overlap] = self._current["actions"][index:]
             request = dict(observation)
             request.update(
-                rtc_previous_model_actions=previous,
+                rtc_previous_actions=previous,
                 rtc_delay_steps=delay,
                 rtc_overlap_steps=overlap,
             )

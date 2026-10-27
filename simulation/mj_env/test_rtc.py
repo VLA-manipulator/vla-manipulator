@@ -19,7 +19,6 @@ class RTCControllerTest(unittest.TestCase):
             value = len(requests)
             return {
                 "actions": np.full((10, 6), value, dtype=np.float32),
-                "rtc_model_actions": np.arange(10 * 8, dtype=np.float32).reshape(10, 8),
             }
 
         controller = RTCController(infer, horizon=10, min_horizon=3, initial_delay=2)
@@ -32,10 +31,10 @@ class RTCControllerTest(unittest.TestCase):
             self.assertEqual(requests[1]["rtc_delay_steps"], 2)
             self.assertEqual(requests[1]["rtc_overlap_steps"], 7)
             np.testing.assert_array_equal(
-                requests[1]["rtc_previous_model_actions"][:7],
-                np.arange(10 * 8, dtype=np.float32).reshape(10, 8)[3:],
+                requests[1]["rtc_previous_actions"][:7],
+                np.full((7, 6), 1, dtype=np.float32),
             )
-            self.assertTrue(np.all(requests[1]["rtc_previous_model_actions"][7:] == 0))
+            self.assertTrue(np.all(requests[1]["rtc_previous_actions"][7:] == 0))
             self.assertTrue(np.all(action == 2))
         finally:
             controller.close()
@@ -51,7 +50,6 @@ class RTCControllerTest(unittest.TestCase):
                 gate.wait(timeout=2)
             return {
                 "actions": np.zeros((4, 6), dtype=np.float32),
-                "rtc_model_actions": np.zeros((4, 8), dtype=np.float32),
             }
 
         controller = RTCController(infer, horizon=4, min_horizon=1, initial_delay=1)

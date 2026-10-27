@@ -12,6 +12,7 @@ from openpi.models import model as _model
 from openpi.shared import nnx_utils
 
 from openpi_ext.rtc_sampler import install_rtc_sampler
+from openpi_ext.rtc_target import prepare_guided_inputs
 
 
 class RTCPolicy:
@@ -30,24 +31,30 @@ class RTCPolicy:
 
     def infer(self, obs: dict) -> dict:
         request = dict(obs)
-        previous = request.pop("rtc_previous_model_actions", None)
+        previous = request.pop("rtc_previous_actions", None)
         delay = request.pop("rtc_delay_steps", None)
         overlap = request.pop("rtc_overlap_steps", None)
         if previous is not None and (delay is None or overlap is None):
             raise ValueError("RTC request needs delay and overlap with previous actions")
-        inputs = self._base._input_transform(request)
+        if previous is None:
+            inputs = self._base._input_transform(request)
+            target = None
+        else:
+            inputs, target = prepare_guided_inputs(
+                self._base._input_transform,
+                request,
+                previous,
+                horizon=self._base._model.action_horizon,
+                action_dim=self._base._model.action_dim,
+            )
         inputs = jax.tree.map(lambda x: jnp.asarray(x)[None, ...], inputs)
         self._base._rng, rng = jax.random.split(self._base._rng)
         observation = _model.Observation.from_dict(inputs)
         start = time.monotonic()
-        if previous is None:
+        if target is None:
             model_actions = self._base._sample_actions(rng, observation, **self._base._sample_kwargs)
         else:
-            previous = np.asarray(previous, dtype=np.float32)
             horizon = self._base._model.action_horizon
-            dimension = self._base._model.action_dim
-            if previous.shape != (horizon, dimension) or not np.isfinite(previous).all():
-                raise ValueError(f"RTC previous actions must be finite {(horizon, dimension)}")
             if not (0 <= int(delay) <= int(overlap) <= horizon):
                 raise ValueError("RTC requires 0 <= delay <= overlap <= horizon")
             sample_kwargs = dict(self._base._sample_kwargs)
@@ -55,7 +62,7 @@ class RTCPolicy:
             model_actions = self._sample_rtc(
                 rng,
                 observation,
-                previous_actions=jnp.asarray(previous)[None, ...],
+                previous_actions=jnp.asarray(target)[None, ...],
                 inference_delay=jnp.asarray(delay, dtype=jnp.int32),
                 overlap=jnp.asarray(overlap, dtype=jnp.int32),
                 **sample_kwargs,
