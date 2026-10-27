@@ -152,7 +152,7 @@ def inspect_staging(input_root: Path) -> tuple[dict[str, Any], list[dict[str, An
 
 
 def convert_dataset(
-    input_root: Path,
+    input_root: Path | list[Path],
     output_root: Path,
     repo_id: str,
     *,
@@ -163,13 +163,24 @@ def convert_dataset(
     private: bool = True,
 ) -> tuple[int, int]:
     """Validate staging data, create LeRobot output, and return episode/frame totals."""
-    input_root = Path(input_root).resolve()
+    using_lerobot = dataset_factory is None
+    input_roots = (
+        [Path(input_root).resolve()]
+        if isinstance(input_root, (str, Path))
+        else [Path(root).resolve() for root in input_root]
+    )
+    if not input_roots:
+        raise ValueError("at least one staging input is required")
     output_root = Path(output_root).resolve()
     if output_root.exists():
         raise FileExistsError(
             f"output already exists: {output_root}; choose a new path to avoid overwriting data"
         )
-    metadata, records, height, width = inspect_staging(input_root)
+    inspected = [(root, *inspect_staging(root)) for root in input_roots]
+    metadata, _, height, width = inspected[0][1:]
+    for root, other_metadata, _, other_height, other_width in inspected[1:]:
+        if other_metadata != metadata or (other_height, other_width) != (height, width):
+            raise ValueError(f"incompatible staging metadata or image size: {root}")
 
     if dataset_factory is None:
         try:
@@ -191,46 +202,59 @@ def convert_dataset(
     )
     total_frames = 0
     try:
-        for record in records:
-            with np.load(input_root / record["path"], allow_pickle=False) as episode:
-                frame_count, _, _, task = _validate_episode(
-                    episode, record, fps=metadata["fps"]
-                )
-                for index in range(frame_count):
-                    dataset.add_frame(
-                        {
-                            "image": episode["image"][index],
-                            "wrist_image": episode["wrist_image"][index],
-                            "state": episode["state"][index],
-                            "actions": episode["actions"][index],
-                            "task": task,
-                            # Staging timestamps were validated above. LeRobot
-                            # generates its version-specific timestamp value
-                            # from frame_index / fps in add_frame().
-                        }
+        episodes = 0
+        for root, _, records, _, _ in inspected:
+            for record in records:
+                with np.load(root / record["path"], allow_pickle=False) as episode:
+                    frame_count, _, _, task = _validate_episode(
+                        episode, record, fps=metadata["fps"]
                     )
-                dataset.save_episode()
-                total_frames += frame_count
-                print(
-                    f"converted episode={record['episode_index']} frames={frame_count} task={task!r}",
-                    flush=True,
-                )
+                    for index in range(frame_count):
+                        dataset.add_frame(
+                            {
+                                "image": episode["image"][index],
+                                "wrist_image": episode["wrist_image"][index],
+                                "state": episode["state"][index],
+                                "actions": episode["actions"][index],
+                                "task": task,
+                                # Staging timestamps were validated above. LeRobot
+                                # generates its version-specific timestamp value
+                                # from frame_index / fps in add_frame().
+                            }
+                        )
+                    dataset.save_episode()
+                    episodes += 1
+                    total_frames += frame_count
+                    print(
+                        f"converted episode={record['episode_index']} frames={frame_count} task={task!r}",
+                        flush=True,
+                    )
         if push_to_hub:
             dataset.push_to_hub(
                 tags=["so101", "mujoco", "openpi", "pi05"],
                 private=private,
                 push_videos=use_videos,
             )
+        if using_lerobot:
+            info_path = output_root / "meta" / "info.json"
+            info = json.loads(info_path.read_text(encoding="utf-8"))
+            if (
+                info.get("total_episodes") != episodes
+                or info.get("total_frames") != total_frames
+                or info.get("fps") != metadata["fps"]
+                or (use_videos and info.get("total_videos") != 2 * episodes)
+            ):
+                raise ValueError(f"converted LeRobot metadata count mismatch: {info}")
     finally:
         stop_writer = getattr(dataset, "stop_image_writer", None)
         if callable(stop_writer):
             stop_writer()
-    return len(records), total_frames
+    return episodes, total_frames
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input-root", type=Path, required=True)
+    parser.add_argument("--input-root", type=Path, required=True, action="append")
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--repo-id", required=True, help="LeRobot/Hugging Face dataset ID")
     parser.add_argument(
