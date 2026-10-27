@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 
@@ -95,6 +96,20 @@ class ConverterTest(unittest.TestCase):
             self.assertNotIn("timestamp", fake.frames[1])
             self.assertEqual(fake.saved_episodes, 1)
             self.assertTrue(fake.stopped)
+
+            second = root / "staging_second"
+            shutil.copytree(source, second)
+            combined = _FakeDataset()
+            counts = convert_dataset(
+                [source, second],
+                root / "lerobot_combined",
+                "local/combined",
+                use_videos=False,
+                dataset_factory=lambda **_: combined,
+            )
+            self.assertEqual(counts, (2, 4))
+            self.assertEqual(combined.saved_episodes, 2)
+            self.assertEqual(len(combined.frames), 4)
 
 
 if __name__ == "__main__":
