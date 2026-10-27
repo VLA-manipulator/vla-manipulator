@@ -42,6 +42,65 @@ def diagnose(record: dict) -> list[str]:
     return labels
 
 
+def summarize_chunk_seams(chunks: list[np.ndarray], replan_steps: int) -> dict:
+    """Compare absolute, clipped radian motor targets inside/across chunks.
+
+    The overlap comparison uses the old chunk's prediction for the first
+    action of the next chunk; these are position targets, not action deltas.
+    """
+    within = []
+    boundary = []
+    overlap = []
+    for index, chunk in enumerate(chunks):
+        executed = chunk[:replan_steps]
+        if len(executed) > 1:
+            within.extend(np.linalg.norm(np.diff(executed, axis=0), axis=1).tolist())
+        if index:
+            old = chunks[index - 1]
+            boundary.append(float(np.linalg.norm(executed[0] - old[replan_steps - 1])))
+            if len(old) > replan_steps:
+                overlap.append(float(np.linalg.norm(executed[0] - old[replan_steps])))
+
+    def stats(values: list[float]) -> dict:
+        return {
+            "count": len(values),
+            "mean": round(float(np.mean(values)), 5) if values else None,
+            "p95": round(float(np.percentile(values, 95)), 5) if values else None,
+        }
+
+    return {
+        "within_chunk_target_step_l2_rad": stats(within),
+        "boundary_target_step_l2_rad": stats(boundary),
+        "overlap_prediction_disagreement_l2_rad": stats(overlap),
+    }
+
+
+def summarize_seams_near_event(seam_events: list[dict], anchor_step: int | None) -> dict:
+    """Split chunk boundaries around first grasp (or closest approach)."""
+    if anchor_step is None:
+        return {}
+    windows = {
+        "earlier": [event for event in seam_events if event["step"] < anchor_step - 20],
+        "before_20_steps": [event for event in seam_events if anchor_step - 20 <= event["step"] < anchor_step],
+        "after_20_steps": [event for event in seam_events if anchor_step <= event["step"] <= anchor_step + 20],
+        "later": [event for event in seam_events if event["step"] > anchor_step + 20],
+    }
+    return {
+        name: {
+            "count": len(events),
+            "mean_target_jump_l2_rad": round(float(np.mean([e["target_jump_l2_rad"] for e in events])), 5)
+            if events else None,
+            "mean_observed_step_l2_rad": round(float(np.mean([e["observed_step_l2_rad"] for e in events])), 5)
+            if events else None,
+            "mean_overlap_disagreement_l2_rad": round(
+                float(np.mean([e["overlap_disagreement_l2_rad"] for e in events
+                               if e["overlap_disagreement_l2_rad"] is not None])), 5
+            ) if any(e["overlap_disagreement_l2_rad"] is not None for e in events) else None,
+        }
+        for name, events in windows.items()
+    }
+
+
 def run_episode(client, target: str, seed: int, max_steps: int, replan_steps: int) -> dict:
     env = SO101TabletopEnv(target_object=target, render_mode=None, max_episode_steps=max_steps)
     adapter = LeRobotSO101Adapter(env)
@@ -64,6 +123,9 @@ def run_episode(client, target: str, seed: int, max_steps: int, replan_steps: in
         grasp_run = 0
         longest_grasp_run = 0
         inference_seconds = []
+        action_chunks = []
+        observed_joint_chunks = []
+        seam_events = []
         executed = 0
         while executed < max_steps and not info["success"]:
             request = {
@@ -77,15 +139,38 @@ def run_episode(client, target: str, seed: int, max_steps: int, replan_steps: in
             inference_seconds.append(time.monotonic() - infer_start)
             if chunk.ndim != 2 or chunk.shape[0] == 0 or chunk.shape[1] != 6 or not np.isfinite(chunk).all():
                 raise ValueError(f"invalid policy action chunk: {chunk.shape}")
-            for normalized_action in chunk[:replan_steps]:
+            if chunk.shape[0] < replan_steps:
+                raise ValueError(f"action chunk shorter than replan-steps: {chunk.shape[0]} < {replan_steps}")
+            # OpenPI has already inverted DeltaActions before serving. Compare
+            # the absolute position targets actually sent to MuJoCo, including
+            # the adapter's actuator-range clipping.
+            action_chunks.append(np.stack([adapter.from_lerobot(action) for action in chunk]))
+            observed_joint_chunk = []
+            for action_index, normalized_action in enumerate(chunk[:replan_steps]):
                 excess = np.maximum(np.maximum(lo - normalized_action, normalized_action - hi), 0.0)
                 clipped = excess > 0.5  # ignore tiny float round-off in motor units
                 clipped_steps += int(bool(np.any(clipped)))
                 clipped_by_motor += clipped
                 max_motor_range_excess = max(max_motor_range_excess, float(np.max(excess)))
-                motor_target = adapter.from_lerobot(normalized_action)
+                motor_target = action_chunks[-1][action_index]
+                previous_observed = np.asarray(observation["observation.state"], dtype=np.float32)
                 observation, _, terminated, truncated, info = env.step(motor_target)
+                observed_joint_chunk.append(np.asarray(observation["observation.state"], dtype=np.float32).copy())
                 executed += 1
+                if action_index == 0 and len(action_chunks) > 1:
+                    old_chunk, new_chunk = action_chunks[-2:]
+                    seam_events.append({
+                        "step": executed,
+                        "target_jump_l2_rad": round(float(np.linalg.norm(new_chunk[0] - old_chunk[replan_steps - 1])), 5),
+                        "observed_step_l2_rad": round(float(np.linalg.norm(
+                            observation["observation.state"] - previous_observed
+                        )), 5),
+                        "overlap_disagreement_l2_rad": round(float(np.linalg.norm(
+                            new_chunk[0] - old_chunk[replan_steps]
+                        )), 5) if len(old_chunk) > replan_steps else None,
+                        "tcp_target_distance_m": round(float(info["tcp_target_distance"]), 5),
+                        "grasped": bool(info["grasped"]),
+                    })
                 tracking_errors.append(float(np.mean(np.abs(observation["observation.state"] - motor_target))))
                 distance = float(info["tcp_target_distance"])
                 if distance < min_distance:
@@ -104,6 +189,7 @@ def run_episode(client, target: str, seed: int, max_steps: int, replan_steps: in
                 ))
                 if terminated or truncated or executed >= max_steps:
                     break
+            observed_joint_chunks.append(np.stack(observed_joint_chunk))
             if terminated or truncated:
                 break
         record = {
@@ -128,6 +214,13 @@ def run_episode(client, target: str, seed: int, max_steps: int, replan_steps: in
             "inference_calls": len(inference_seconds),
             "wall_seconds": round(time.monotonic() - start, 2),
             "layout_fallback": bool(info["layout_fallback"]),
+            "chunk_seams": summarize_chunk_seams(action_chunks, replan_steps),
+            "observed_joint_seams": summarize_chunk_seams(observed_joint_chunks, replan_steps),
+            "seam_event_anchor": "first_grasp" if first_grasp_step is not None else "closest_approach",
+            "seam_windows": summarize_seams_near_event(
+                seam_events, first_grasp_step if first_grasp_step is not None else closest_step
+            ),
+            "seam_events": seam_events,
         }
         record["symptoms"] = diagnose(record)
         return record
