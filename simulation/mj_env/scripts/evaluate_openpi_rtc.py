@@ -25,11 +25,15 @@ def main() -> int:
     parser.add_argument("--horizon", type=int, default=10)
     parser.add_argument("--min-horizon", type=int, default=3)
     parser.add_argument("--initial-delay", type=int, default=2)
+    parser.add_argument("--latency-margin-steps", type=int, default=1)
+    parser.add_argument("--calibration-requests", type=int, default=3)
     parser.add_argument("--max-steps", type=int, default=600)
     parser.add_argument("--render", action="store_true")
     args = parser.parse_args()
-    if args.episodes <= 0 or args.max_steps <= 0:
-        parser.error("episodes and max-steps must be positive")
+    if args.episodes <= 0 or args.max_steps <= 0 or args.calibration_requests <= 0:
+        parser.error("episodes, max-steps and calibration-requests must be positive")
+    if not (0 < args.min_horizon < args.horizon) or args.latency_margin_steps < 0:
+        parser.error("require 0 < min-horizon < horizon and nonnegative latency margin")
 
     from openpi_client import websocket_client_policy
 
@@ -51,6 +55,43 @@ def main() -> int:
 
     successes = 0
     try:
+        # The first calls compile the ordinary and guided JAX paths.  Exclude
+        # compilation from steady-state latency measurement, but do not score
+        # or advance the simulator during warm-up.
+        warm_observation, _ = env.reset(seed=args.seed, options={"target_object": args.target})
+        warm_request = request(warm_observation)
+        first = client.infer(warm_request)
+        warm_previous = np.zeros((args.horizon, 6), dtype=np.float32)
+        warm_previous[: args.horizon - args.min_horizon] = np.asarray(first["actions"], dtype=np.float32)[
+            args.min_horizon : args.horizon
+        ]
+        guided_request = {
+            **warm_request,
+            "rtc_previous_actions": warm_previous,
+            "rtc_delay_steps": min(args.initial_delay, args.horizon - args.min_horizon),
+            "rtc_overlap_steps": args.horizon - args.min_horizon,
+        }
+        client.infer(guided_request)
+        latency_ms: list[float] = []
+        for _ in range(args.calibration_requests):
+            for probe in (warm_request, guided_request):
+                began = time.monotonic()
+                client.infer(probe)
+                latency_ms.append((time.monotonic() - began) * 1000)
+        measured_delay = math.ceil(max(latency_ms) * env.control_hz / 1000)
+        initial_delay = max(args.initial_delay, measured_delay)
+        if initial_delay + args.latency_margin_steps >= args.horizon:
+            raise RTCDeadlineMissed(
+                f"measured round-trip latency {max(latency_ms):.1f} ms needs "
+                f"{initial_delay} steps plus {args.latency_margin_steps} margin; "
+                f"the {args.horizon}-step chunk cannot cover it"
+            )
+        print(
+            f"rtc_calibration requests={len(latency_ms)} rtt_p50_ms={np.median(latency_ms):.1f} "
+            f"rtt_max_ms={max(latency_ms):.1f} delay_steps={initial_delay} "
+            f"margin_steps={args.latency_margin_steps}",
+            flush=True,
+        )
         for episode in range(args.episodes):
             seed = args.seed + episode
             observation, info = env.reset(seed=seed, options={"target_object": args.target})
@@ -58,7 +99,8 @@ def main() -> int:
                 client.infer,
                 horizon=args.horizon,
                 min_horizon=args.min_horizon,
-                initial_delay=args.initial_delay,
+                initial_delay=initial_delay,
+                latency_margin_steps=args.latency_margin_steps,
             )
             steps = 0
             outcome = False

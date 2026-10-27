@@ -63,6 +63,34 @@ class RTCControllerTest(unittest.TestCase):
             gate.set()
             controller.close()
 
+    def test_request_window_advances_for_measured_latency(self):
+        controller = RTCController(
+            lambda _request: {"actions": np.zeros((10, 6), dtype=np.float32)},
+            horizon=10,
+            min_horizon=5,
+            initial_delay=7,
+            latency_margin_steps=1,
+        )
+        try:
+            self.assertEqual(controller.request_step(), 2)
+            self.assertEqual(controller.forecast_delay_steps, 7)
+        finally:
+            controller.close()
+
+    def test_rejects_latency_that_cannot_fit(self):
+        controller = RTCController(
+            lambda _request: {"actions": np.zeros((10, 6), dtype=np.float32)},
+            horizon=10,
+            min_horizon=3,
+            initial_delay=9,
+            latency_margin_steps=1,
+        )
+        try:
+            with self.assertRaises(RTCDeadlineMissed):
+                controller.request_step()
+        finally:
+            controller.close()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,15 +32,19 @@ class RTCController:
         min_horizon: int = 3,
         initial_delay: int = 2,
         delay_history: int = 10,
+        latency_margin_steps: int = 1,
     ) -> None:
         if not (0 < min_horizon < horizon):
             raise ValueError("min_horizon must be between 1 and horizon-1")
-        if not (0 <= initial_delay <= horizon - min_horizon):
-            raise ValueError("initial_delay exceeds the overlap budget")
+        if not (0 <= initial_delay < horizon):
+            raise ValueError("initial_delay must fit within the action horizon")
+        if latency_margin_steps < 0:
+            raise ValueError("latency_margin_steps must be nonnegative")
         self._infer = infer
         self.horizon = horizon
         self.action_dim = action_dim
         self.min_horizon = min_horizon
+        self.latency_margin_steps = latency_margin_steps
         self._delays: deque[int] = deque([initial_delay], maxlen=delay_history)
         self._worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="rtc-inference")
         self._current: dict | None = None
@@ -58,6 +62,17 @@ class RTCController:
     @property
     def infer_times_ms(self) -> tuple[float, ...]:
         return tuple(self._infer_times_ms)
+
+    @property
+    def forecast_delay_steps(self) -> int:
+        return max(self._delays)
+
+    def request_step(self) -> int:
+        """Start early enough to leave the measured delay plus a safety margin."""
+        latest = self.horizon - self.forecast_delay_steps - self.latency_margin_steps
+        if latest < 1:
+            raise RTCDeadlineMissed("measured inference delay exceeds the action chunk budget")
+        return min(self.min_horizon, latest)
 
     def start(self, observation: dict) -> None:
         if self._current is not None:
@@ -91,10 +106,10 @@ class RTCController:
             self._deadline_misses += 1
             raise RTCDeadlineMissed(f"inference exceeded the {self.horizon}-step chunk")
 
-        if self._pending is None and index >= self.min_horizon:
+        if self._pending is None and index >= self.request_step():
             overlap = self.horizon - index
             delay = max(self._delays)
-            if delay > overlap:
+            if delay + self.latency_margin_steps > overlap:
                 self._deadline_misses += 1
                 raise RTCDeadlineMissed(f"forecast delay {delay} exceeds overlap {overlap}")
             previous = np.zeros_like(self._current["actions"])
