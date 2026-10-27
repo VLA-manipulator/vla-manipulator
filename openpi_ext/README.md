@@ -19,6 +19,8 @@ Implemented:
 - `check_so101_roundtrip.py`: reads a real LeRobot frame and checks the
   six-dimensional field mapping, delta/absolute action conversion, and
   checkpoint normalization roundtrip. It does not evaluate model quality.
+- `serve_rtc.py` / `rtc_sampler.py`: opt-in real-time chunking inference with
+  the paper's soft overlap guidance. Setup and limitations: [RTC_SO101.md](RTC_SO101.md).
 
 The LoRA config combines OpenPI's official `pi05_libero` architecture with the
 official `pi0_libero_low_mem_finetune` LoRA variants and freeze filter. OpenPI
